@@ -65,6 +65,7 @@ def doUpdate(baseurl) {
 def processEntry(title, id, timestamp, url) {
 
   def es_record = [:]
+  es_record.areas = []
   def default_langcode = 'en'
 
   println("process ${url}");
@@ -92,11 +93,14 @@ def processEntry(title, id, timestamp, url) {
 
     info.'cap:parameter'.each { param ->
       // println("${param.'cap:valueName'} = ${param.'cap:value'}")
-      addOrAppendElement(
     }
-    info.'cap:area'.each { area ->
+    info.'cap:area'.each { area_xml ->
       // println("${area.'cap:areaDesc'} -- ${area.'cap:polygon'}");
-      def area = extractArea()
+      def area = extractArea(area_xml)
+
+      // What we *should* do here is to see if we have the area already, but with a different langstring variant,
+      // and add a variant label to the area rather than duplicating the whole area. But it's a POC, so lets live with it
+      es_record.areas.add(area);
     }
 
     println("Add ${toJson(es_record)} ");
