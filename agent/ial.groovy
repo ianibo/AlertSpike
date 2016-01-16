@@ -23,6 +23,8 @@ import static groovy.json.JsonOutput.*
 import java.text.SimpleDateFormat
 
 
+println("Run as groovy -Dgroovy.grape.autoDownload=false  ./ial.groovy\nTo avoid startup lag");
+
 
 doUpdate('https://alerts.internetalerts.org/feed')
 
@@ -30,7 +32,10 @@ doUpdate('https://alerts.internetalerts.org/feed')
 
 def doUpdate(baseurl) {
   try {
-    def rss_page = new XmlParser( new org.cyberneko.html.parsers.SAXParser() ).parse(baseurl) 
+    def rss_page = new XmlParser().parse(baseurl) 
+    rss_page.feed.entry.each { entry ->
+      println(entry)
+    }
   }
   catch ( Exception e ) {
     println("ERROR....(${baseurl})"+e.message);
