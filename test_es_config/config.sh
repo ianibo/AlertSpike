@@ -15,11 +15,20 @@ curl -XPUT 'http://localhost:9200/alerts/alert/_mapping' -d '
             "type":"string", 
             "store":"yes" 
          }, 
-         "alertShape": {
-            "type": "geo_shape",
-            "tree": "quadtree",
-            "precision": "1m"
-        }
+         "areas" : {
+           "properties":{
+             "alertShape": {
+                "type": "geo_shape",
+                "tree": "quadtree",
+                "precision": "1m"
+             },
+             "label":{
+               "index":"not_analyzed", 
+               "type":"string", 
+               "store":"yes" 
+             }
+           }
+         }
       }
    } 
 }' 

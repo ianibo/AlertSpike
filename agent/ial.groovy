@@ -159,7 +159,7 @@ def extractArea(area_xml) {
       sw.write(stage2[0]);
       sw.write(' ');
     }
-    result.geom=[type:'polygon', polygon:sw.toString()]
+    result.geom=[type:'polygon', coordinates:sw.toString()]
 
     result.fingerPrint = 'polygon'+cap_polygon
   }
