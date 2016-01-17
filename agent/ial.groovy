@@ -242,7 +242,7 @@ def processEntry(title, rec_id, timestamp, url) {
       }
     }
 
-    println("Add record ${ctr}");
+    println("Add record ${ctr} -- contains ${es_record.areas.size()} area entries");
 
     try {
         def future = esclient.index {

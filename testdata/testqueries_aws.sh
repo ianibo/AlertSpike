@@ -26,7 +26,7 @@ curl -XGET 'http://52.31.77.192/es/alerts/alert/_search' -d '
 
 
 # Lets see if we can find by intersecting circle
-curl -XGET 'http://localhost:9200/alerts/alert/_search' -d '
+curl -XGET 'http://52.31.77.192/es/alerts/alert/_search' -d '
 {
     "query":{
         "bool": {
@@ -35,7 +35,7 @@ curl -XGET 'http://localhost:9200/alerts/alert/_search' -d '
             },
             "filter": {
                 "geo_shape": {
-                    "alertShape": {
+                    "areas.alertShape": {
                         "shape": {
                             "type": "circle",
                             "coordinates" : [-109.5288,40.4555],
