@@ -34,6 +34,7 @@ import org.elasticsearch.groovy.*
 import org.elasticsearch.common.transport.InetSocketTransportAddress
 import static org.elasticsearch.node.NodeBuilder.nodeBuilder
 
+import java.security.MessageDigest
 
 Settings settings = Settings.settingsBuilder()
                        .put("client.transport.sniff", true)
@@ -202,7 +203,7 @@ def extractArea(area_xml) {
     println("split ${stage1[0]}");
     def stage2 = stage1[0].split(',' as String); // Split cap records lat,lon. ES expects X,Y so we have to flip
     result.geom=[type:'circle', coordinates:[stage2[1],  stage2[0]], radius:stage1[1]]
-    result.fingerPrint = 'circle'+cap_circle
+    result.fingerPrint = generateMD5_A("circle_"+stage2[1]+"_"+stage2[0]+"_"+stage1[1]);
   }
 
   def cap_polygon = area_xml.'cap:polygon'.text().trim()
@@ -217,9 +218,13 @@ def extractArea(area_xml) {
       sw.write(' ');
     }
     result.geom=[type:'polygon', coordinates:sw.toString()]
-
-    result.fingerPrint = 'polygon'+cap_polygon
+    result.fingerPrint = generateMD5_A('polygon'+cap_polygon)
   }
 
   return result
 }
+
+def generateMD5_A(String s){
+    MessageDigest.getInstance("MD5").digest(s.bytes).encodeHex().toString()
+}
+
