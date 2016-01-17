@@ -222,7 +222,7 @@ def processEntry(title, rec_id, timestamp, url) {
       // and add a variant label to the area rather than duplicating the whole area. But it's a POC, so lets live with it
 
       // Do we alreadt have an area with a fingerprint that matches the new area? If so, just add a langstring variant
-      def existing_area = es_record.areas.find { it.fingerprint = area.fingerprint }
+      def existing_area = es_record.areas.find { it.fingerPrint == area.fingerPrint }
       if ( existing_area ) {
         addOrAppendElement(existing_area, "label", area.label, langcode, default_langcode, true);
       }
