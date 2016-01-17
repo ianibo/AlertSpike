@@ -299,6 +299,8 @@ def extractArea(area_xml) {
   def result = [:]
   result.label = area_xml.'cap:areaDesc'.text().trim()
 
+  println("Process area ${result.label}");
+
   def cap_circle = area_xml.'cap:circle'.text().trim()
   if ( cap_circle.length() > 0 ) {
     def stage1 = cap_circle.split(' ' as String); // Split on space to get radius. ES Circle defaults to meters as a unit. CAP seems to be different.
@@ -310,16 +312,46 @@ def extractArea(area_xml) {
   def cap_polygon = area_xml.'cap:polygon'.text().trim()
   if ( cap_polygon.length() > 0 ) {
     def stage1 = cap_polygon.split(' ' as String);  // Split components of polygon
-    StringWriter sw = new StringWriter()
+    result_shape = []
+    def last_x=null, last_y=null
+    def pos = 0;
     stage1.each {
-      def stage2 = it.split(',' as String); // Sply lat,lon so we can flip to X,Y
-      sw.write(stage2[1]);
-      sw.write(',');
-      sw.write(stage2[0]);
-      sw.write(' ');
+      def stage2 = it.split(',' as String); // Split lat,lon so we can flip to X,Y
+      // We've discovered that ES chokes if you send in a polygon where points are repeated. Lets check for that and not do it
+      def next_x = Double.parseDouble(stage2[1])
+      def next_y = Double.parseDouble(stage2[0])
+      // println("Compare ${next_x} and ${last_x} and ${next_y} and ${last_y}");
+      if ( ( next_x != last_x ) && ( next_y != last_y ) ) {
+        result_shape.add( [Double.parseDouble(stage2[1]), Double.parseDouble(stage2[0])] )
+        last_x = next_x;
+        last_y = next_y;
+      }
+      else {
+        println("Possibly malformed polygon with repeated point (${last_x},${last_y}) at position ${pos} in polygon. Skipping repeated point");
+      }
+      pos++
     }
-    result.alertShape=[type:'polygon', coordinates:sw.toString()]
-    result.fingerPrint = generateMD5_A('polygon'+cap_polygon)
+
+    // Check that polygon is a closed linear ring
+    def last_point = result_shape.size() -1;
+
+    if ( last_point > 0 ) {
+      println("Checking that point at position ${last_point} closes the polygon");
+      // Dunno if I should do this, or throw away the record -- Just massage it into something we can handle for now.
+      if ( ( result_shape[last_point][0] != result_shape[0][0] ) && 
+           ( result_shape[last_point][1] != result_shape[0][1] ) ) {
+        println("Shape is not a closed linear ring. Adding in first coordinate to terminate.");
+        result_shape.add([result_shape[0][0],result_shape[0][1]])
+      }
+
+      println("polygon: ${result_shape}")
+
+      result.alertShape=[type:'polygon', coordinates:[result_shape]]
+      result.fingerPrint = generateMD5_A('polygon'+cap_polygon)
+    }
+    else {
+      println("ERROR - No points in closed linear ring");
+    }
   }
 
   return result
