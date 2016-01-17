@@ -7,10 +7,6 @@ curl -XPUT 'http://localhost:9200/alerts/alert/_mapping' -d '
 { 
    "alert":{ 
       "properties":{ 
-         "longId":{ 
-            "type":"long", 
-            "store":"yes" 
-         }, 
          "id":{ 
             "include_in_all":"false", 
             "index":"not_analyzed", 
