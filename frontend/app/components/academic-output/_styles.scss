@@ -1,0 +1,14 @@
+.academicOutput {
+  .main {
+    .title-area {
+      h1 {
+        @include special-title ($inverse-title-bg, 10px);
+      }
+      .sub-title {
+        .text {
+          
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,7 @@
+@mixin special-title($colour, $radius) {
+  padding: 10px 0.5em;
+  background: none $colour;
+  color: contrast-color($colour);
+  @include border-top-left-radius($radius);
+  @include border-bottom-right-radius($radius);
+}
