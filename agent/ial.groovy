@@ -310,7 +310,7 @@ def extractArea(area_xml) {
   def result = [:]
   result.label = area_xml.'cap:areaDesc'.text().trim()
 
-  println("Process area ${result.label}");
+  // println("Process area ${result.label}");
 
   def cap_circle = area_xml.'cap:circle'.text().trim()
   if ( cap_circle.length() > 0 ) {
@@ -338,7 +338,7 @@ def extractArea(area_xml) {
         last_y = next_y;
       }
       else {
-        println("Possibly malformed polygon with repeated point (${last_x},${last_y}) at position ${pos} in polygon. Skipping repeated point");
+        // println("Possibly malformed polygon with repeated point (${last_x},${last_y}) at position ${pos} in polygon. Skipping repeated point");
       }
       pos++
     }
@@ -347,14 +347,14 @@ def extractArea(area_xml) {
     def last_point = result_shape.size() -1;
 
     if ( last_point > 0 ) {
-      println("Checking that point at position ${last_point} closes the polygon (${result_shape[0][0]},${result_shape[0][1]}) == (${result_shape[last_point][0]},${result_shape[last_point][1]})");
+      // println("Checking that point at position ${last_point} closes the polygon (${result_shape[0][0]},${result_shape[0][1]}) == (${result_shape[last_point][0]},${result_shape[last_point][1]})");
       // Dunno if I should do this, or throw away the record -- Just massage it into something we can handle for now.
       if ( ( result_shape[last_point][0] == result_shape[0][0] ) && 
            ( result_shape[last_point][1] == result_shape[0][1] ) ) {
-        println("Polygon already closed");
+        // println("Polygon already closed");
       }
       else {
-        println("Shape is not a closed linear ring. Adding in first coordinate to terminate.");
+        // println("Shape is not a closed linear ring. Adding in first coordinate to terminate.");
         result_shape.add([result_shape[0][0],result_shape[0][1]])
       }
 
@@ -365,7 +365,7 @@ def extractArea(area_xml) {
       result.fingerPrint = generateMD5_A('polygon'+cap_polygon)
     }
     else {
-      println("ERROR - No points in closed linear ring");
+      // println("ERROR - No points in closed linear ring");
     }
   }
 
