@@ -212,6 +212,8 @@ def processEntry(title, rec_id, timestamp, url) {
       langcode=entry_lang.substring(0,2);
     }
 
+    // println("Process cap:info for ${langcode}");
+
     // Cycle through the fields we want to extract, and see if each property is present
     infoFields.each { k,v ->
       def value = info."${v.element}"?.text().trim()
@@ -225,45 +227,50 @@ def processEntry(title, rec_id, timestamp, url) {
       // println("${param.'cap:valueName'} = ${param.'cap:value'}")
     }
     info.'cap:area'.each { area_xml ->
-      // println("${area.'cap:areaDesc'} -- ${area.'cap:polygon'}");
+      // println("Processing area");
       def area = extractArea(area_xml)
 
       // What we *should* do here is to see if we have the area already, but with a different langstring variant,
       // and add a variant label to the area rather than duplicating the whole area. But it's a POC, so lets live with it
 
       // Do we alreadt have an area with a fingerprint that matches the new area? If so, just add a langstring variant
+      println("compare fingerprints ${area.fingerPrint}");
+
       def existing_area = es_record.areas.find { it.fingerPrint == area.fingerPrint }
       if ( existing_area ) {
+        println("Extend existing area ${area.fingerPrint}");
         addOrAppendElement(existing_area, "label", area.label, langcode, default_langcode, true);
       }
       else {
+        println("New area ${area.fingerPrint}");
         es_record.areas.add(area);
         addOrAppendElement(area, "label", area.label, langcode, default_langcode, true);
       }
     }
-
-    println("Add record ${ctr} -- contains ${es_record.areas.size()} area entries");
-
-    def submit_start = System.currentTimeMillis();
-
-    try {
-        def future = esclient.index {
-          index "alerts"
-          type "alert"
-          id rec_id
-          source es_record
-        }
-
-        future.get()
-        println("Done.. ${ctr++}");
-    }
-    catch ( Exception e ) {
-      e.printStackTrace()
-    }
-
-    println("ES update in ${System.currentTimeMillis()-submit_start}ms for ${url}");
-
   }
+
+  println("Add record ${ctr} -- contains ${es_record.areas.size()} area entries");
+
+  def submit_start = System.currentTimeMillis();
+
+  try {
+    def future = esclient.index {
+      index "alerts"
+      type "alert"
+      id rec_id
+      source es_record
+    }
+
+    future.get()
+    println("Done.. ${ctr++}");
+  }
+  catch ( Exception e ) {
+    e.printStackTrace()
+    println("Error processing ${url} \n\n${toJson(es_record)}\n\n");
+    System.exit(0);
+  }
+
+  println("ES update in ${System.currentTimeMillis()-submit_start}ms for ${url}");
 }
 
 def addOrAppendElement(basemap, elementname, value, langcode, default_langcode, is_langstring) {
@@ -324,7 +331,7 @@ def extractArea(area_xml) {
       // We've discovered that ES chokes if you send in a polygon where points are repeated. Lets check for that and not do it
       def next_x = Double.parseDouble(stage2[1])
       def next_y = Double.parseDouble(stage2[0])
-      // println("Compare ${next_x} and ${last_x} and ${next_y} and ${last_y}");
+      println("Compare ${next_x} and ${last_x} and ${next_y} and ${last_y}");
       if ( ( next_x != last_x ) && ( next_y != last_y ) ) {
         result_shape.add( [Double.parseDouble(stage2[1]), Double.parseDouble(stage2[0])] )
         last_x = next_x;
@@ -342,13 +349,13 @@ def extractArea(area_xml) {
     if ( last_point > 0 ) {
       println("Checking that point at position ${last_point} closes the polygon (${result_shape[0][0]},${result_shape[0][1]}) == (${result_shape[last_point][0]},${result_shape[last_point][1]})");
       // Dunno if I should do this, or throw away the record -- Just massage it into something we can handle for now.
-      if ( ( result_shape[last_point][0] != result_shape[0][0] ) && 
-           ( result_shape[last_point][1] != result_shape[0][1] ) ) {
-        println("Shape is not a closed linear ring. Adding in first coordinate to terminate.");
-        result_shape.add([result_shape[0][0],result_shape[0][1]])
+      if ( ( result_shape[last_point][0] == result_shape[0][0] ) && 
+           ( result_shape[last_point][1] == result_shape[0][1] ) ) {
+        println("Polygon already closed");
       }
       else {
-        println("Polygon already closed");
+        println("Shape is not a closed linear ring. Adding in first coordinate to terminate.");
+        result_shape.add([result_shape[0][0],result_shape[0][1]])
       }
 
       // println("polygon: ${result_shape}")
