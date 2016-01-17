@@ -318,7 +318,7 @@ def extractArea(area_xml) {
       sw.write(stage2[0]);
       sw.write(' ');
     }
-    result.geom=[type:'polygon', coordinates:sw.toString()]
+    result.alertShape=[type:'polygon', coordinates:sw.toString()]
     result.fingerPrint = generateMD5_A('polygon'+cap_polygon)
   }
 
