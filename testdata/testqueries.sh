@@ -75,6 +75,10 @@ curl -XGET 'http://localhost:9200/alerts/alert/_search' -d '
 }
 '
 
+
+
+## GOT THIS WORKING!!!
+
 curl -XGET 'http://localhost:9200/alerts/alert/_search' -d '
 {
     "query":{

@@ -75,3 +75,35 @@ curl -XGET 'http://52.31.77.192/es/alerts/alert/_search' -d '
 }
 '
 
+
+
+curl -XGET 'http://52.31.77.192/es/alerts/alert/_search' -d '
+{
+    "query":{
+        "bool": {
+            "must": {
+                "match_all": {}
+            },
+            "filter": {
+                "nested":{
+                    "path":"areas",
+                    "filter" : {
+                        "geo_shape": {
+                            "areas.alertShape": {
+                                "shape": {
+                                    "type": "polygon",
+                                    "coordinates" : [ [ [-90,48], [-95,48], [-95,51], [-90,51], [-90,48] ] ]
+                                },
+                                "relation" : "intersects"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+'
+
+
+
