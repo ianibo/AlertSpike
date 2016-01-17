@@ -14,6 +14,7 @@ curl -XPUT 'http://localhost:9200/alerts/alert/_mapping' -d '
             "store":"yes" 
          }, 
          "areas" : {
+           "type": "nested",
            "properties":{
              "alertShape": {
                 "type": "geo_shape",
@@ -21,7 +22,6 @@ curl -XPUT 'http://localhost:9200/alerts/alert/_mapping' -d '
                 "precision": "100m"
              },
              "label":{
-               "index":"not_analyzed", 
                "type":"string", 
                "store":"yes" 
              }

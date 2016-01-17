@@ -51,3 +51,27 @@ curl -XGET 'http://localhost:9200/alerts/alert/_search' -d '
     }
 }
 '
+
+curl -XGET 'http://localhost:9200/alerts/alert/_search' -d '
+{
+    "query":{
+        "bool": {
+            "must": {
+                "match_all": {}
+            },
+            "filter": {
+                "geo_shape": {
+                    "areas.alertShape": {
+                        "shape": {
+                            "type": "polygon",
+                            "coordinates" : [ [ [-108,50], [-110,50.00], [-110,51], [-108,51], [-108,50.00] ] ]
+                        },
+                        "relation" : "within"
+                    }
+                }
+            }
+        }
+    }
+}
+'
+
