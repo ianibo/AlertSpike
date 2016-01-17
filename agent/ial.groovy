@@ -244,6 +244,8 @@ def processEntry(title, rec_id, timestamp, url) {
 
     println("Add record ${ctr} -- contains ${es_record.areas.size()} area entries");
 
+    def submit_start = System.currentTimeMillis();
+
     try {
         def future = esclient.index {
           index "alerts"
@@ -258,6 +260,8 @@ def processEntry(title, rec_id, timestamp, url) {
     catch ( Exception e ) {
       e.printStackTrace()
     }
+
+    println("ES update in ${System.currentTimeMillis()-submit_start}ms");
 
   }
 }
