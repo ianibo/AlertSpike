@@ -261,7 +261,7 @@ def processEntry(title, rec_id, timestamp, url) {
       e.printStackTrace()
     }
 
-    println("ES update in ${System.currentTimeMillis()-submit_start}ms");
+    println("ES update in ${System.currentTimeMillis()-submit_start}ms for ${url}");
 
   }
 }
