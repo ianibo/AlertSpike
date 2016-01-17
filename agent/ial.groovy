@@ -175,8 +175,6 @@ def processEntry(title, rec_id, timestamp, url) {
   // Lets use the feed ID to make sure we don't have namespace clashes
   es_record.id = rec_id
 
-  println("process record with id : ${es_record.id} class: ${es_record.id.class.name}");
-  
   entry.'cap:info'.each { info ->
 
     // Looks like each info section is repeated with a language code.. 
@@ -209,7 +207,6 @@ def processEntry(title, rec_id, timestamp, url) {
       // Do we alreadt have an area with a fingerprint that matches the new area? If so, just add a langstring variant
       def existing_area = es_record.areas.find { it.fingerprint = area.fingerprint }
       if ( existing_area ) {
-        println("Found existing area -- adding label");
         addOrAppendElement(existing_area, "label", area.label, langcode, default_langcode, true);
       }
       else {
@@ -228,7 +225,6 @@ def processEntry(title, rec_id, timestamp, url) {
           source es_record
         }
 
-        println("Wait..");
         future.get()
         println("Done.. ${ctr++}");
     }
@@ -278,9 +274,7 @@ def extractArea(area_xml) {
 
   def cap_circle = area_xml.'cap:circle'.text().trim()
   if ( cap_circle.length() > 0 ) {
-    println("split ${cap_circle}");
     def stage1 = cap_circle.split(' ' as String); // Split on space to get radius. ES Circle defaults to meters as a unit. CAP seems to be different.
-    println("split ${stage1[0]}");
     def stage2 = stage1[0].split(',' as String); // Split cap records lat,lon. ES expects X,Y so we have to flip
     result.geom=[type:'circle', coordinates:[stage2[1],  stage2[0]], radius:stage1[1]]
     result.fingerPrint = generateMD5_A("circle_"+stage2[1]+"_"+stage2[0]+"_"+stage1[1]);
