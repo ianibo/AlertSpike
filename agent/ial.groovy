@@ -303,7 +303,7 @@ def extractArea(area_xml) {
   if ( cap_circle.length() > 0 ) {
     def stage1 = cap_circle.split(' ' as String); // Split on space to get radius. ES Circle defaults to meters as a unit. CAP seems to be different.
     def stage2 = stage1[0].split(',' as String); // Split cap records lat,lon. ES expects X,Y so we have to flip
-    result.geom=[type:'circle', coordinates:[stage2[1],  stage2[0]], radius:stage1[1]]
+    result.alertShape=[type:'circle', coordinates:[stage2[1],  stage2[0]], radius:stage1[1]]
     result.fingerPrint = generateMD5_A("circle_"+stage2[1]+"_"+stage2[0]+"_"+stage1[1]);
   }
 
