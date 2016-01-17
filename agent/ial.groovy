@@ -95,6 +95,7 @@ def doUpdate(baseurl) {
       baseurl_config.head_timestamp=0;
       baseurl_config.last_checked=0;
       baseurl_config.atom_highest_timestamp=0
+      baseurl_config.feed_updated_timestamp=0
       config[baseurl] = baseurl_config;
     }
 
@@ -111,17 +112,43 @@ def doUpdate(baseurl) {
                      .parse(baseurl)
                      .declareNamespace(atom:'http://www.w3.org/2005/Atom')
 
-    def feed_last_modified = feed.'atom:updated'
-    println("Last modified : ${feed_last_modified}");
+    def feed_last_modified = feed.'atom:updated'.text().trim()
+    // TimeZone in the feed is not RFC822 - grr - strip out the annoying :
+    def l = feed_last_modified.length()
+    feed_last_modified = feed_last_modified.substring(0,l-3)+feed_last_modified.substring(l-2,l);
 
-    feed.'atom:entry'.each { entry ->
-      // println(entry.title)
-      // println(entry.id)
-      // println(entry.updated)
-      processEntry(entry.'atom:title'.text(),
-                   entry.'atom:id'.text(),
-                   entry.'atom:updated'.text(),
-                   entry.'atom:link'.@href.text())
+    println("Last modified : ${feed_last_modified}");
+    def sdt = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")
+    
+    def parsed_feed_last_modified = sdt.parse(feed_last_modified).getTime();
+
+    def biggest_timestamp = 0;
+
+    if ( parsed_feed_last_modified > baseurl_config.feed_updated_timestamp ) {
+      println("Feed updated(${parsed_feed_last_modified}) since last check(${baseurl_config.feed_updated_timestamp}) - process");
+      feed.'atom:entry'.each { entry ->
+
+        def entry_updated = entry.'atom:updated'.text().trim();
+        entry_updated = entry_updated.substring(0,l-3)+entry_updated.substring(l-2,l);
+        def parsed_entry_updated = sdt.parse(entry_updated).getTime();
+
+        if ( parsed_entry_updated > baseurl_config.atom_highest_timestamp ) {
+          if (  parsed_entry_updated > biggest_timestamp )
+            biggest_timestamp = parsed_entry_updated
+          // println(entry.title)
+          // println(entry.id)
+          // println(entry.updated)
+          processEntry(entry.'atom:title'.text(),
+                       entry.'atom:id'.text(),
+                       entry_updated,
+                       entry.'atom:link'.@href.text())
+        }
+      }
+
+      // update for config file -- Time of last update to feed
+      baseurl_config.feed_updated_timestamp=parsed_feed_last_modified
+      // Biggest timestamp we have seen in a record so far
+      baseurl_config.atom_highest_timestamp=biggest_timestamp
     }
   }
   catch ( Exception e ) {
@@ -191,7 +218,7 @@ def processEntry(title, rec_id, timestamp, url) {
       }
     }
 
-    println("Add record ${ctr} ${es_record}");
+    println("Add record ${ctr}");
 
     try {
         def future = esclient.index {
