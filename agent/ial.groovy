@@ -69,6 +69,11 @@ feeds = [
   'https://alerts.internetalerts.org/subscriptions/public-alerts'
 ]
 
+// Do it
+listen()
+
+// Will never reach this. use ctrl-c to exit
+System.exit(0);
 
 def listen() {
   while ( true ) {
@@ -89,7 +94,9 @@ def listen() {
       doUpdate(feed);
     }
 
+    // Update config file with latest state information
     cfg_file << toJson(config);
+
     synchronized(this) {
       Thread.sleep(5000);
     }
@@ -144,11 +151,10 @@ def doUpdate(baseurl) {
         def parsed_entry_updated = sdt.parse(entry_updated).getTime();
 
         if ( parsed_entry_updated > baseurl_config.atom_highest_timestamp ) {
+
           if (  parsed_entry_updated > biggest_timestamp )
             biggest_timestamp = parsed_entry_updated
-          // println(entry.title)
-          // println(entry.id)
-          // println(entry.updated)
+
           processEntry(entry.'atom:title'.text(),
                        entry.'atom:id'.text(),
                        entry_updated,
