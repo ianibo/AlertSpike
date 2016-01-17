@@ -7,6 +7,7 @@
     @Grab(group='org.codehaus.groovy.modules.http-builder', module='http-builder', version='0.5.1'),
     @Grab(group='xerces', module='xercesImpl', version='2.9.1'),
     @Grab(group='org.elasticsearch', module='elasticsearch-groovy', version='2.0.0'),
+    @Grab(group='org.apache.httpcomponents', module='httpclient', version='4.5.1'),
     @GrabExclude('org.codehaus.groovy:groovy-all')   
 ])
 
@@ -22,6 +23,7 @@ import org.apache.http.entity.mime.*
 import org.apache.http.entity.mime.content.*
 import java.nio.charset.Charset
 import static groovy.json.JsonOutput.*
+import groovy.json.JsonSlurper
 import java.text.SimpleDateFormat
 import java.net.InetAddress;
 
@@ -66,22 +68,60 @@ infoFields = [
 
 
 println("Run as groovy -Dgroovy.grape.autoDownload=false  ./ial.groovy\nTo avoid startup lag");
+
+config = null;
+
+cfg_file = new File('./ial-config.json');
+if ( cfg_file.exists() ) {
+  config = new JsonSlurper().parseText( cfg_file.text )
+}
+else {
+  config = [:]
+}
+
 // doUpdate('https://alerts.internetalerts.org/feed')
 doUpdate('https://alerts.internetalerts.org/subscriptions/public-alerts')
 
+cfg_file << toJson(config);
 
 
 def doUpdate(baseurl) {
+
   try {
-    def feed = new XmlSlurper().parse(baseurl) 
-    feed.entry.each { entry ->
+
+    def baseurl_config = config[baseurl]
+    if ( baseurl_config == null ) {
+      baseurl_config = [:]
+      baseurl_config.head_timestamp=0;
+      baseurl_config.last_checked=0;
+      baseurl_config.atom_highest_timestamp=0
+      config[baseurl] = baseurl_config;
+    }
+
+    // lets use HTTPBuilders neat HeadMethod to see when the file was last touched
+    def head = new org.apache.http.client.methods.HttpHead(baseurl);
+
+    def headers = head.getAllHeaders();
+    println("Headers : ${headers}");
+    // looks like //alerts.internetalerts.org/subscriptions/public-alerts isn't carrying any last modified headers
+    // in response to HEAD -- would be great if this could be added -- especially if we're polling at second level resolution
+
+    // We really should use HTTP HEAD here to get the last touched time of the feed - and be super efficient
+    def feed = new XmlSlurper()
+                     .parse(baseurl)
+                     .declareNamespace(atom:'http://www.w3.org/2005/Atom')
+
+    def feed_last_modified = feed.'atom:updated'
+    println("Last modified : ${feed_last_modified}");
+
+    feed.'atom:entry'.each { entry ->
       // println(entry.title)
       // println(entry.id)
       // println(entry.updated)
-      processEntry(entry.title.text(),
-                   entry.id.text(),
-                   entry.updated.text(),
-                   entry.link.@href.text())
+      processEntry(entry.'atom:title'.text(),
+                   entry.'atom:id'.text(),
+                   entry.'atom:updated'.text(),
+                   entry.'atom:link'.@href.text())
     }
   }
   catch ( Exception e ) {
