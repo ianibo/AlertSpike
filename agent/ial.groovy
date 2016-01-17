@@ -181,7 +181,7 @@ def doUpdate(baseurl) {
   catch ( Exception e ) {
     println("ERROR....(${baseurl})"+e.message);
     e.printStackTrace();
-    throw(e)
+    System.exit(1)
   }
 }
 
@@ -340,16 +340,20 @@ def extractArea(area_xml) {
     def last_point = result_shape.size() -1;
 
     if ( last_point > 0 ) {
-      println("Checking that point at position ${last_point} closes the polygon");
+      println("Checking that point at position ${last_point} closes the polygon (${result_shape[0][0]},${result_shape[0][1]}) == (${result_shape[last_point][0]},${result_shape[last_point][1]})");
       // Dunno if I should do this, or throw away the record -- Just massage it into something we can handle for now.
       if ( ( result_shape[last_point][0] != result_shape[0][0] ) && 
            ( result_shape[last_point][1] != result_shape[0][1] ) ) {
         println("Shape is not a closed linear ring. Adding in first coordinate to terminate.");
         result_shape.add([result_shape[0][0],result_shape[0][1]])
       }
+      else {
+        println("Polygon already closed");
+      }
 
-      println("polygon: ${result_shape}")
+      // println("polygon: ${result_shape}")
 
+      // N.B. Coordinates is a list of closed linear rings
       result.alertShape=[type:'polygon', coordinates:[result_shape]]
       result.fingerPrint = generateMD5_A('polygon'+cap_polygon)
     }
