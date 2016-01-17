@@ -52,15 +52,15 @@ ctr = 0
 // will add that field (If the value is different). Not sure this is the best way to go -- mixing
 // locales in IR is always a tricky thing - will probably need to be reviewed and improved many times.
 infoFields = [
-    language:[element:'cap:language',    langstring:true,    json_element:'language'],
-    category:[element:'cap:category',    langstring:true,    json_element:'category'],
-       event:[element:'cap:event',       langstring:true,    json_element:'event'],
-      source:[element:'cap:source',      langstring:true,    json_element:'source'],
-       scope:[element:'cap:scope',       langstring:true,    json_element:'scope'],
-    headline:[element:'cap:headline',    langstring:true,    json_element:'headline'],
- description:[element:'cap:description', langstring:true,    json_element:'description'],
- instruction:[element:'cap:instruction', langstring:true,    json_element:'instruction'],
-         web:[element:'cap:web',         langstring:true,    json_element:'web']
+    language:[element:'cap:language',    langstring:false,    json_element:'language'],
+    category:[element:'cap:category',    langstring:false,    json_element:'category'],
+       event:[element:'cap:event',       langstring:true,     json_element:'event'],
+      source:[element:'cap:source',      langstring:true,     json_element:'source'],
+       scope:[element:'cap:scope',       langstring:true,     json_element:'scope'],
+    headline:[element:'cap:headline',    langstring:true,     json_element:'headline'],
+ description:[element:'cap:description', langstring:true,     json_element:'description'],
+ instruction:[element:'cap:instruction', langstring:true,     json_element:'instruction'],
+         web:[element:'cap:web',         langstring:false,    json_element:'web']
 ];
 
 
@@ -139,7 +139,16 @@ def processEntry(title, rec_id, timestamp, url) {
       // What we *should* do here is to see if we have the area already, but with a different langstring variant,
       // and add a variant label to the area rather than duplicating the whole area. But it's a POC, so lets live with it
 
-      es_record.areas.add(area);
+      // Do we alreadt have an area with a fingerprint that matches the new area? If so, just add a langstring variant
+      def existing_area = es_record.areas.find { it.fingerprint = area.fingerprint }
+      if ( existing_area ) {
+        println("Found existing area -- adding label");
+        addOrAppendElement(existing_area, "label", area.label, langcode, default_langcode, true);
+      }
+      else {
+        es_record.areas.add(area);
+        addOrAppendElement(area, "label", area.label, langcode, default_langcode, true);
+      }
     }
 
     println("Add record ${ctr} ${es_record}");
@@ -183,11 +192,15 @@ def addString(basemap,elementname,value) {
   }
   else if ( basemap[elementname] instanceof List ) {
     // property is already a list, add another value
-    basemap[elementname] = basemap[elementname].add(value)
+    if ( ! basemap[elementname].contains(value) ) {
+      basemap[elementname] = basemap[elementname].add(value)
+    }
   }
   else {
     // Convert scalar to list
-    basemap[elementname] = [basemap[elementname], value]
+    if ( basemap[elementname] != value ) {
+      basemap[elementname] = [basemap[elementname], value]
+    }
   }
 }
 
