@@ -98,7 +98,8 @@ def listen() {
     cfg_file << toJson(config);
 
     synchronized(this) {
-      Thread.sleep(5000);
+      println("Sleeping 5 mins");
+      Thread.sleep(300000);
     }
   }
 }
@@ -135,15 +136,17 @@ def doUpdate(baseurl) {
     def l = feed_last_modified.length()
     feed_last_modified = feed_last_modified.substring(0,l-3)+feed_last_modified.substring(l-2,l);
 
-    println("Last modified : ${feed_last_modified}");
     def sdt = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")
-    
     def parsed_feed_last_modified = sdt.parse(feed_last_modified).getTime();
 
-    def biggest_timestamp = 0;
+    println("Last modified : ${feed_last_modified}/${parsed_feed_last_modified}");
+
+    def biggest_timestamp = baseurl_config.atom_highest_timestamp;
 
     if ( parsed_feed_last_modified > baseurl_config.feed_updated_timestamp ) {
+
       println("Feed updated(${parsed_feed_last_modified}) since last check(${baseurl_config.feed_updated_timestamp}) - process");
+
       feed.'atom:entry'.each { entry ->
 
         def entry_updated = entry.'atom:updated'.text().trim();
@@ -160,7 +163,14 @@ def doUpdate(baseurl) {
                        entry_updated,
                        entry.'atom:link'.@href.text())
         }
+        else {
+          // println("Already seen: ${entry.'atom:id'.text()}");
+        }
+
       }
+      println("Completed processing");
+
+      println("Updating config - parsed_feed_last_modified = ${parsed_feed_last_modified}");
 
       // update for config file -- Time of last update to feed
       baseurl_config.feed_updated_timestamp=parsed_feed_last_modified
