@@ -65,25 +65,36 @@ infoFields = [
          web:[element:'cap:web',         langstring:false,    json_element:'web']
 ];
 
+feeds = [
+  'https://alerts.internetalerts.org/subscriptions/public-alerts'
+]
 
 
-println("Run as groovy -Dgroovy.grape.autoDownload=false  ./ial.groovy\nTo avoid startup lag");
+def listen() {
+  while ( true ) {
+    println("Run as groovy -Dgroovy.grape.autoDownload=false  ./ial.groovy\nTo avoid startup lag");
 
-config = null;
+    config = null;
 
-cfg_file = new File('./ial-config.json');
-if ( cfg_file.exists() ) {
-  config = new JsonSlurper().parseText( cfg_file.text )
+    cfg_file = new File('./ial-config.json');
+    if ( cfg_file.exists() ) {
+      config = new JsonSlurper().parseText( cfg_file.text )
+    }
+    else {
+      config = [:]
+    }
+
+    // doUpdate('https://alerts.internetalerts.org/feed')
+    feeds.each { feed ->
+      doUpdate(feed);
+    }
+
+    cfg_file << toJson(config);
+    synchronized(this) {
+      Thread.sleep(5000);
+    }
+  }
 }
-else {
-  config = [:]
-}
-
-// doUpdate('https://alerts.internetalerts.org/feed')
-doUpdate('https://alerts.internetalerts.org/subscriptions/public-alerts')
-
-cfg_file << toJson(config);
-
 
 def doUpdate(baseurl) {
 
