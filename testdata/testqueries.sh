@@ -37,13 +37,13 @@ curl -XGET 'http://localhost:9200/alerts/alert/_search' -d '
             },
             "filter": {
                 "geo_shape": {
-                    "alertShape": {
+                    "areas.alertShape": {
                         "shape": {
                             "type": "circle",
-                            "coordinates" : [-109.5288,40.4555],
+                            "coordinates" : [-93,50],
                             "radius" : "1000m"
-
-                        }
+                        },
+                        "relation" : "intersects"
                     }
                 }
             }
@@ -66,7 +66,7 @@ curl -XGET 'http://localhost:9200/alerts/alert/_search' -d '
                             "type": "polygon",
                             "coordinates" : [ [ [-108,50], [-110,50.00], [-110,51], [-108,51], [-108,50.00] ] ]
                         },
-                        "relation" : "within"
+                        "relation" : "intersects"
                     }
                 }
             }
@@ -74,4 +74,28 @@ curl -XGET 'http://localhost:9200/alerts/alert/_search' -d '
     }
 }
 '
+
+curl -XGET 'http://localhost:9200/alerts/alert/_search' -d '
+{
+    "query":{
+        "bool": {
+            "must": {
+                "match_all": {}
+            },
+            "filter": {
+                "geo_shape": {
+                    "areas.alertShape": {
+                        "shape": {
+                            "type": "polygon",
+                            "coordinates" : [ [ [-90,48], [-95,48], [-95,51], [-90,51], [-90,48] ] ]
+                        },
+                        "relation" : "intersects"
+                    }
+                }
+            }
+        }
+    }
+}
+'
+
 
