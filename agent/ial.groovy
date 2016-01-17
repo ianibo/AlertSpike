@@ -234,15 +234,15 @@ def processEntry(title, rec_id, timestamp, url) {
       // and add a variant label to the area rather than duplicating the whole area. But it's a POC, so lets live with it
 
       // Do we alreadt have an area with a fingerprint that matches the new area? If so, just add a langstring variant
-      println("compare fingerprints ${area.fingerPrint}");
+      // println("compare fingerprints ${area.fingerPrint}");
 
       def existing_area = es_record.areas.find { it.fingerPrint == area.fingerPrint }
       if ( existing_area ) {
-        println("Extend existing area ${area.fingerPrint}");
+        // println("Extend existing area ${area.fingerPrint}");
         addOrAppendElement(existing_area, "label", area.label, langcode, default_langcode, true);
       }
       else {
-        println("New area ${area.fingerPrint}");
+        // println("New area ${area.fingerPrint}");
         es_record.areas.add(area);
         addOrAppendElement(area, "label", area.label, langcode, default_langcode, true);
       }
@@ -331,7 +331,7 @@ def extractArea(area_xml) {
       // We've discovered that ES chokes if you send in a polygon where points are repeated. Lets check for that and not do it
       def next_x = Double.parseDouble(stage2[1])
       def next_y = Double.parseDouble(stage2[0])
-      println("Compare ${next_x} and ${last_x} and ${next_y} and ${last_y}");
+      // println("Compare ${next_x} and ${last_x} and ${next_y} and ${last_y}");
       if ( ( next_x != last_x ) && ( next_y != last_y ) ) {
         result_shape.add( [Double.parseDouble(stage2[1]), Double.parseDouble(stage2[0])] )
         last_x = next_x;
