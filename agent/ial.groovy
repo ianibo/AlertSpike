@@ -5,7 +5,9 @@
     @Grab(group='org.slf4j', module='jcl-over-slf4j', version='1.7.6'),
     @Grab(group='net.sourceforge.nekohtml', module='nekohtml', version='1.9.14'),
     @Grab(group='org.codehaus.groovy.modules.http-builder', module='http-builder', version='0.5.1'),
-    @Grab(group='xerces', module='xercesImpl', version='2.9.1')
+    @Grab(group='xerces', module='xercesImpl', version='2.9.1'),
+    @Grab(group='org.elasticsearch', module='elasticsearch-groovy', version='2.0.0'),
+    @GrabExclude('org.codehaus.groovy:groovy-all')   
 ])
 
 // http://www.sheffieldairmap.org/view_map.html
@@ -21,7 +23,27 @@ import org.apache.http.entity.mime.content.*
 import java.nio.charset.Charset
 import static groovy.json.JsonOutput.*
 import java.text.SimpleDateFormat
+import java.net.InetAddress;
 
+import org.elasticsearch.client.Client
+import org.elasticsearch.node.Node
+import static org.elasticsearch.node.NodeBuilder.nodeBuilder
+import org.elasticsearch.client.transport.TransportClient
+import org.elasticsearch.common.settings.Settings
+import org.elasticsearch.groovy.*
+import org.elasticsearch.common.transport.InetSocketTransportAddress
+import static org.elasticsearch.node.NodeBuilder.nodeBuilder
+
+
+Settings settings = Settings.settingsBuilder()
+                       .put("client.transport.sniff", true)
+                       .put("cluster.name", "elasticsearch")
+                       .build();
+esclient = TransportClient.builder().settings(settings).build();
+// add transport addresses
+esclient.addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("localhost"), 9300 as int))
+
+ctr = 0
 
 
 // Here we list all the fields from the cap object that we want to map into a JSON document for
@@ -43,7 +65,8 @@ infoFields = [
 
 
 println("Run as groovy -Dgroovy.grape.autoDownload=false  ./ial.groovy\nTo avoid startup lag");
-doUpdate('https://alerts.internetalerts.org/feed')
+// doUpdate('https://alerts.internetalerts.org/feed')
+doUpdate('https://alerts.internetalerts.org/subscriptions/public-alerts')
 
 
 
@@ -54,37 +77,51 @@ def doUpdate(baseurl) {
       // println(entry.title)
       // println(entry.id)
       // println(entry.updated)
-      processEntry(entry.title,entry.id,entry.updated,entry.link.@href.text())
+      processEntry(entry.title.text(),
+                   entry.id.text(),
+                   entry.updated.text(),
+                   entry.link.@href.text())
     }
   }
   catch ( Exception e ) {
     println("ERROR....(${baseurl})"+e.message);
+    e.printStackTrace();
+    throw(e)
   }
 }
 
-def processEntry(title, id, timestamp, url) {
+def processEntry(title, rec_id, timestamp, url) {
 
   def es_record = [:]
   es_record.areas = []
   def default_langcode = 'en'
 
-  println("process ${url}");
+  println("processEntry id:${rec_id} url:${url}");
+
   def entry = new XmlSlurper()
                     .parse(url)
                     .declareNamespace(cap: 'urn:oasis:names:tc:emergency:cap:1.2', test: 'urn:oasis:names:tc:emergency:captest:1.2')
-  // println("Identifier ${entry.'cap:identifier'}")
+
+  String local_record_id = entry.'cap:identifier'[0].text()
+
+  // Lets use the feed ID to make sure we don't have namespace clashes
+  es_record.id = rec_id
+
+  println("process record with id : ${es_record.id} class: ${es_record.id.class.name}");
+  
   entry.'cap:info'.each { info ->
 
     // Looks like each info section is repeated with a language code.. 
     def entry_lang = info.'cap:language'.text()
     def langcode = default_langcode
+
     if ( entry_lang.trim().length() > 0 ) {
       langcode=entry_lang.substring(0,2);
     }
 
     // Cycle through the fields we want to extract, and see if each property is present
     infoFields.each { k,v ->
-      def value = info."${v.element}"?.text()
+      def value = info."${v.element}"?.text().trim()
       if ( value && ( value.trim().length() > 0 ) ) {
         // println("Element ${v.element} present, lang is ${entry_locale}, value is ${value}");
         addOrAppendElement(es_record, v.json_element, value, langcode, default_langcode, v.langstring)
@@ -100,10 +137,28 @@ def processEntry(title, id, timestamp, url) {
 
       // What we *should* do here is to see if we have the area already, but with a different langstring variant,
       // and add a variant label to the area rather than duplicating the whole area. But it's a POC, so lets live with it
+
       es_record.areas.add(area);
     }
 
-    println("Add ${toJson(es_record)} ");
+    println("Add record ${ctr} ${es_record}");
+
+    try {
+        def future = esclient.index {
+          index "alerts"
+          type "alert"
+          id rec_id
+          source es_record
+        }
+
+        println("Wait..");
+        future.get()
+        println("Done.. ${ctr++}");
+    }
+    catch ( Exception e ) {
+      e.printStackTrace()
+    }
+
   }
 }
 
@@ -138,22 +193,24 @@ def addString(basemap,elementname,value) {
 def extractArea(area_xml) {
   // Take a cap:area - cap:areaDesc label and geometry such as cap:circle and convert
   def result = [:]
-  result.label = area_xml.'cap:areaDesc'.text()
+  result.label = area_xml.'cap:areaDesc'.text().trim()
 
   def cap_circle = area_xml.'cap:circle'.text().trim()
   if ( cap_circle.length() > 0 ) {
-    def stage1 = cap_circle.split(' '); // Split on space to get radius. ES Circle defaults to meters as a unit. CAP seems to be different.
-    def stage2 = stage1.split(','); // Split cap records lat,lon. ES expects X,Y so we have to flip
+    println("split ${cap_circle}");
+    def stage1 = cap_circle.split(' ' as String); // Split on space to get radius. ES Circle defaults to meters as a unit. CAP seems to be different.
+    println("split ${stage1[0]}");
+    def stage2 = stage1[0].split(',' as String); // Split cap records lat,lon. ES expects X,Y so we have to flip
     result.geom=[type:'circle', coordinates:[stage2[1],  stage2[0]], radius:stage1[1]]
     result.fingerPrint = 'circle'+cap_circle
   }
 
   def cap_polygon = area_xml.'cap:polygon'.text().trim()
   if ( cap_polygon.length() > 0 ) {
-    def stage1 = cap_polygon.split(' ');  // Split components of polygon
+    def stage1 = cap_polygon.split(' ' as String);  // Split components of polygon
     StringWriter sw = new StringWriter()
     stage1.each {
-      def stage2 = it.split(','); // Sply lat,lon so we can flip to X,Y
+      def stage2 = it.split(',' as String); // Sply lat,lon so we can flip to X,Y
       sw.write(stage2[1]);
       sw.write(',');
       sw.write(stage2[0]);
