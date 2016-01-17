@@ -22,7 +22,7 @@ curl -XPUT 'http://localhost:9200/alerts/alert/_mapping' -d '
              "alertShape": {
                 "type": "geo_shape",
                 "tree": "quadtree",
-                "precision": "1m"
+                "precision": "100m"
              },
              "label":{
                "index":"not_analyzed", 
