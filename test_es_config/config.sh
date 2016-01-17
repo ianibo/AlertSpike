@@ -1,3 +1,5 @@
+# Clear down
+curl -XDELETE 'http://localhost:9200/alerts'
 # Create an index called alerts
 curl -XPUT 'http://localhost:9200/alerts'
 # Create a type mapping called alert
