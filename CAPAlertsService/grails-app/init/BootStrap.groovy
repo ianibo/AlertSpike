@@ -1,3 +1,5 @@
+import capalerts.*;
+
 class BootStrap {
 
   def init = { servletContext ->

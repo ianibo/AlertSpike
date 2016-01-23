@@ -8,5 +8,6 @@ class AlertProfile {
   String radius
 
   static constraints = {
+    radius nullable:true, blank:false
   }
 }
