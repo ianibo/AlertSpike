@@ -7,7 +7,10 @@ class ProfileController {
   def index() { 
     def result = [:]
     result.alerts = AlertProfile.executeQuery('select ap from AlertProfile as ap where ap.name like ?',['%'], [max: 10, offset: 0]);
-    render result as JSON
+    withFormat {
+      json { render result as JSON }
+      html result
+    }
   }
 
   def feed() {
@@ -21,9 +24,11 @@ class ProfileController {
       else {
         result.message = "Unable to locate profile with id "+params.id;
       }
+      render result as JSON
+    }
+    else {
     }
 
-    render result as JSON
   }
 
 }
