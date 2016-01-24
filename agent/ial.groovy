@@ -1,8 +1,8 @@
 @Grapes([
     // @GrabResolver(name='central', root='http://central.maven.org/maven2/'),
     @GrabResolver(name='mvnRepository', root='http://central.maven.org/maven2/'),
-    @Grab(group='org.slf4j', module='slf4j-api', version='1.7.6'),
-    @Grab(group='org.slf4j', module='jcl-over-slf4j', version='1.7.6'),
+    // @Grab(group='org.slf4j', module='slf4j-api', version='1.7.6'),
+    // @Grab(group='org.slf4j', module='jcl-over-slf4j', version='1.7.6'),
     @Grab(group='net.sourceforge.nekohtml', module='nekohtml', version='1.9.14'),
     @Grab(group='org.codehaus.groovy.modules.http-builder', module='http-builder', version='0.5.1'),
     @Grab(group='xerces', module='xercesImpl', version='2.9.1'),
@@ -54,15 +54,15 @@ ctr = 0
 // will add that field (If the value is different). Not sure this is the best way to go -- mixing
 // locales in IR is always a tricky thing - will probably need to be reviewed and improved many times.
 infoFields = [
-    language:[element:'cap:language',    langstring:false,    json_element:'language'],
-    category:[element:'cap:category',    langstring:false,    json_element:'category'],
-       event:[element:'cap:event',       langstring:true,     json_element:'event'],
-      source:[element:'cap:source',      langstring:true,     json_element:'source'],
-       scope:[element:'cap:scope',       langstring:true,     json_element:'scope'],
-    headline:[element:'cap:headline',    langstring:true,     json_element:'headline'],
- description:[element:'cap:description', langstring:true,     json_element:'description'],
- instruction:[element:'cap:instruction', langstring:true,     json_element:'instruction'],
-         web:[element:'cap:web',         langstring:false,    json_element:'web']
+    language:[element:'language',    langstring:false,    json_element:'language'],
+    category:[element:'category',    langstring:false,    json_element:'category'],
+       event:[element:'event',       langstring:true,     json_element:'event'],
+      source:[element:'source',      langstring:true,     json_element:'source'],
+       scope:[element:'scope',       langstring:true,     json_element:'scope'],
+    headline:[element:'headline',    langstring:true,     json_element:'headline'],
+ description:[element:'description', langstring:true,     json_element:'description'],
+ instruction:[element:'instruction', langstring:true,     json_element:'instruction'],
+         web:[element:'web',         langstring:false,    json_element:'web']
 ];
 
 feeds = [
@@ -195,17 +195,20 @@ def processEntry(title, rec_id, timestamp, url) {
 
   def entry = new XmlSlurper()
                     .parse(url)
-                    .declareNamespace(cap: 'urn:oasis:names:tc:emergency:cap:1.2', test: 'urn:oasis:names:tc:emergency:captest:1.2')
+                    // .declareNamespace(cap: 'urn:oasis:names:tc:emergency:cap:1.2', test: 'urn:oasis:names:tc:emergency:captest:1.2')
 
-  String local_record_id = entry.'cap:identifier'[0].text()
+  // String local_record_id = entry.'cap:identifier'[0].text()
+  String local_record_id = entry.'identifier'[0].text()
 
   // Lets use the feed ID to make sure we don't have namespace clashes
   es_record.id = rec_id
 
-  entry.'cap:info'.each { info ->
+  // entry.'cap:info'.each { info ->
+  entry.'info'.each { info ->
 
     // Looks like each info section is repeated with a language code.. 
-    def entry_lang = info.'cap:language'.text()
+    // def entry_lang = info.'cap:language'.text()
+    def entry_lang = info.'language'.text()
     def langcode = default_langcode
 
     if ( entry_lang.trim().length() > 0 ) {
@@ -223,10 +226,13 @@ def processEntry(title, rec_id, timestamp, url) {
       }
     }
 
-    info.'cap:parameter'.each { param ->
+    // info.'cap:parameter'.each { param ->
+    info.'parameter'.each { param ->
       // println("${param.'cap:valueName'} = ${param.'cap:value'}")
     }
-    info.'cap:area'.each { area_xml ->
+
+    // info.'cap:area'.each { area_xml ->
+    info.'area'.each { area_xml ->
       // println("Processing area");
       def area = extractArea(area_xml)
 
@@ -267,7 +273,7 @@ def processEntry(title, rec_id, timestamp, url) {
   catch ( Exception e ) {
     e.printStackTrace()
     println("Error processing ${url} \n\n${toJson(es_record)}\n\n");
-    System.exit(0);
+    // System.exit(0);
   }
 
   println("ES update in ${System.currentTimeMillis()-submit_start}ms for ${url}");
@@ -308,11 +314,13 @@ def addString(basemap,elementname,value) {
 def extractArea(area_xml) {
   // Take a cap:area - cap:areaDesc label and geometry such as cap:circle and convert
   def result = [:]
-  result.label = area_xml.'cap:areaDesc'.text().trim()
+  // result.label = area_xml.'cap:areaDesc'.text().trim()
+  result.label = area_xml.'areaDesc'.text().trim()
 
   // println("Process area ${result.label}");
 
-  def cap_circle = area_xml.'cap:circle'.text().trim()
+  // def cap_circle = area_xml.'cap:circle'.text().trim()
+  def cap_circle = area_xml.'circle'.text().trim()
   if ( cap_circle.length() > 0 ) {
     def stage1 = cap_circle.split(' ' as String); // Split on space to get radius. ES Circle defaults to meters as a unit. CAP seems to be different.
     def stage2 = stage1[0].split(',' as String); // Split cap records lat,lon. ES expects X,Y so we have to flip
@@ -320,7 +328,8 @@ def extractArea(area_xml) {
     result.fingerPrint = generateMD5_A("circle_"+stage2[1]+"_"+stage2[0]+"_"+stage1[1]);
   }
 
-  def cap_polygon = area_xml.'cap:polygon'.text().trim()
+  // def cap_polygon = area_xml.'cap:polygon'.text().trim()
+  def cap_polygon = area_xml.'polygon'.text().trim()
   if ( cap_polygon.length() > 0 ) {
     def stage1 = cap_polygon.split(' ' as String);  // Split components of polygon
     result_shape = []
@@ -347,11 +356,11 @@ def extractArea(area_xml) {
     def last_point = result_shape.size() -1;
 
     if ( last_point > 0 ) {
-      // println("Checking that point at position ${last_point} closes the polygon (${result_shape[0][0]},${result_shape[0][1]}) == (${result_shape[last_point][0]},${result_shape[last_point][1]})");
+      println("Checking that point at position ${last_point} closes the polygon (${result_shape[0][0]},${result_shape[0][1]}) == (${result_shape[last_point][0]},${result_shape[last_point][1]})");
       // Dunno if I should do this, or throw away the record -- Just massage it into something we can handle for now.
       if ( ( result_shape[last_point][0] == result_shape[0][0] ) && 
            ( result_shape[last_point][1] == result_shape[0][1] ) ) {
-        // println("Polygon already closed");
+        println("Polygon already closed");
       }
       else {
         // println("Shape is not a closed linear ring. Adding in first coordinate to terminate.");
