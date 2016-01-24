@@ -62,6 +62,10 @@ dependencies {
     compile "org.grails.plugins:cache"
     compile "org.hibernate:hibernate-ehcache"
     compile "org.grails.plugins:scaffolding"
+    compile("org.elasticsearch:elasticsearch-groovy:2.0.0") {
+      exclude group:'org.codehaus.groovy', module:'groovy-all'
+    }
+
 
     runtime "org.grails.plugins:asset-pipeline"
 
