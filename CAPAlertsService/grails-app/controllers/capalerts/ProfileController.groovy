@@ -27,11 +27,11 @@ class ProfileController {
       result.alert = AlertProfile.get(params.id)
       if ( result.alert ) {
 
-        def query_string="q:*"
+        def query_str="q:*"
 
         try {
 
-          def search = esclient.search {
+          def search_future = esclient.search {
                        indices 'alerts'
                        types 'alert'
                        source {
@@ -50,7 +50,9 @@ class ProfileController {
                        }
                      }
 
-          result.hits = search.response.hits
+          def search_response =  search_future.get()
+          // log.debug("Got response: ${search_response}");
+          result.hits = search_response.hits
         }
         catch ( Exception e ) {
           log.error("Error processing search", e);
