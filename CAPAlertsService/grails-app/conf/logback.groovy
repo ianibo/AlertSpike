@@ -10,15 +10,15 @@ appender('STDOUT', ConsoleAppender) {
 
 root(INFO, ['STDOUT'])
 logger 'grails.app.controllers', DEBUG
-logger 'grails.app.controllers.uk', DEBUG
-logger 'grails.plugin.springsecurity', WARN
-logger 'org.springframework.security', WARN
-logger 'org.springframework.web', WARN
-logger 'grails.artefact.Interceptor', WARN, ['STDOUT'], false
+// logger 'grails.app.controllers.uk', DEBUG
+// logger 'grails.plugin.springsecurity', WARN
+// logger 'org.springframework.security', WARN
+// logger 'org.springframework.web', WARN
+// logger 'grails.artefact.Interceptor', WARN, ['STDOUT'], false
 
-logger 'com.k_int', DEBUG
+logger 'capalerts', DEBUG
 logger 'grails.app.init.BootStrap', DEBUG
-logger 'grails.artefact.Interceptor', WARN
+// logger 'grails.artefact.Interceptor', WARN
 
 
 def targetDir = BuildSettings.TARGET_DIR

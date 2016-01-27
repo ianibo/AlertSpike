@@ -1,6 +1,7 @@
 feed.gsp
-
-<pre>
-${hits}
-</pre>
+<ul>
+<g:each in="${hits}" var="h">
+  <li><pre>${h}</pre></li>
+</g:each>
+</ul>
 

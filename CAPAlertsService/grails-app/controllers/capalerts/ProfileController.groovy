@@ -27,7 +27,7 @@ class ProfileController {
       result.alert = AlertProfile.get(params.id)
       if ( result.alert ) {
 
-        def query_str="q:*"
+        def query_str="*"
 
         try {
 
@@ -51,8 +51,12 @@ class ProfileController {
                      }
 
           def search_response =  search_future.get()
-          // log.debug("Got response: ${search_response}");
-          result.hits = search_response.hits
+          log.debug("Got response: ${search_response}");
+          result.hits = []
+          search_response.hits.hits.each { hit ->
+            log.debug("Adding hit ${hit}");
+            result.hits.add(hit.source)
+          }
         }
         catch ( Exception e ) {
           log.error("Error processing search", e);
@@ -62,9 +66,13 @@ class ProfileController {
       else {
         result.message = "Unable to locate profile with id "+params.id;
       }
-      render result as JSON
     }
     else {
+    }
+
+    withFormat {
+      json { render result as JSON }
+      html result
     }
 
   }
