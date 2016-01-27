@@ -9,9 +9,10 @@ class ProfileController {
   def index() { 
     def result = [:]
     result.alerts = AlertProfile.executeQuery('select ap from AlertProfile as ap where ap.name like ?',['%'], [max: 10, offset: 0]);
+
     withFormat {
-      json { render result as JSON }
       html result
+      json { render result as JSON }
     }
   }
 
@@ -37,9 +38,28 @@ class ProfileController {
                        source {
                          from = result.offset
                          size = result.max
+                         // query {
+                         //   query_string (query: query_str)
+                         // }
+
                          query {
-                           query_string (query: query_str)
+                           bool {
+                             must {
+                               match_all {}
+                             }
+                             filter {
+                               geo_shape {
+                                 alertShape {
+                                   shape {
+                                     type "polygon"
+                                     coordinates [ [-109.5297,40.4554], [-109.5298,40.4556], [-109.5299,40.4556], [-109.5299,40.4554], [-109.5297,40.4554] ]
+                                   }
+                                 }
+                               }
+                             }
+                           }
                          }
+
                          // facets {
                          //   'Component Type' {
                          //     terms {
