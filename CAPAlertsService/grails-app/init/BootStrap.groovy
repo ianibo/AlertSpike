@@ -12,6 +12,10 @@ class BootStrap {
                   'circle',
                   '[ -1.466944, 53.383611 ]',
                   '5000m'); // 5km circle
+
+    assertProfile('World',
+                  'polygon',
+                  '[ [ [ -180, -90 ], [ 180, -90 ], [ 180, 90 ], [ -180, 90 ], [ -180, -90 ] ] ]');
   }
 
   def destroy = {
