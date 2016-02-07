@@ -91,6 +91,7 @@ class ProfileController {
         log.debug("Got feed ${result.alert.id} ${result.alert.name} ${result.alert.shapeType} ${result.alert.shapeCoordinates} ${result.alert.radius}");
 
         def query_str="*"
+        def sq = [ [ [ 179, 89 ], [ -179, 89 ], [ -179, -89 ], [ 179, -89 ], [ 179, 89 ] ] ]
 
         try {
 
@@ -105,19 +106,22 @@ class ProfileController {
                          // }
 
                          query {
-                           bool : {
-                             must : {
-                               match_all : {}
+                           bool {
+                             must {
+                               match_all {}
                              }
-                             filter : {
-                               nested : {
-                                 geo_shape : {
-                                   'areas.alertShape' : {
-                                     shape : {
-                                       type : "polygon"
-                                       coordinates : result.alert.shapeCoordinates
+                             filter {
+                               nested {
+                                 path = 'areas'
+                                 filter {
+                                   geo_shape {
+                                     areas.alertShape {
+                                       shape {
+                                         type = "polygon"
+                                         coordinates = sq // result.alert.shapeCoordinates
+                                       }
+                                       relation = "intersects"
                                      }
-                                     relation : "intersects"
                                    }
                                  }
                                }
