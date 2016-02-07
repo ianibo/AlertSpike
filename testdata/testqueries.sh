@@ -107,4 +107,60 @@ curl -XGET 'http://localhost:9200/alerts/alert/_search' -d '
 }
 '
 
+# vs
+
+curl -XGET 'http://localhost:9200/alerts/alert/_search' -d '
+{
+    "query":{
+        "bool": {
+            "must": {
+                "match_all": {}
+            },
+            "filter": {
+                        "geo_shape": {
+                            "areas.alertShape": {
+                                "shape": {
+                                    "type": "polygon",
+                                    "coordinates" : [ [ [-90,48], [-95,48], [-95,51], [-90,51], [-90,48] ] ]
+                                },
+                                "relation" : "intersects"
+                            }
+                        }
+                    }
+        }
+    }
+}
+'
+
+
+# Global filter query - seems to work OK
+
+
+curl -XGET 'http://localhost:9200/alerts/alert/_search' -d '
+{
+    "query":{
+        "bool": {
+            "must": {
+                "match_all": {}
+            },
+            "filter": {
+                "nested":{
+                    "path":"areas",
+                    "filter" : {
+                        "geo_shape": {
+                            "areas.alertShape": {
+                                "shape": {
+                                    "type": "polygon",
+                                    "coordinates" : [ [ [ 179, 89 ], [ -179, 89 ], [ -179, -89 ], [ 179, -89 ], [ 179, 89 ] ] ]
+                                },
+                                "relation" : "intersects"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+'
 

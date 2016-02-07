@@ -110,14 +110,15 @@ class ProfileController {
                                match_all : {}
                              }
                              filter : {
-                               geo_shape : {
-                                 alertShape : {
-                                   shape : {
-                                     type : "polygon"
-                                     coordinates : result.alert.shapeCoordinates
-                                     // coordinates : [ [-109.5297,40.4554], [-109.5298,40.4556], [-109.5299,40.4556], [-109.5299,40.4554], [-109.5297,40.4554] ]
+                               nested : {
+                                 geo_shape : {
+                                   'areas.alertShape' : {
+                                     shape : {
+                                       type : "polygon"
+                                       coordinates : result.alert.shapeCoordinates
+                                     }
+                                     relation : "intersects"
                                    }
-                                   relation : "intersects"
                                  }
                                }
                              }
