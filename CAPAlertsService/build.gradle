@@ -40,6 +40,7 @@ assets {
 
 repositories {
     mavenLocal()
+    mavenCentral()
     maven { url "https://repo.grails.org/grails/core" }
 }
 
@@ -62,9 +63,17 @@ dependencies {
     compile "org.grails.plugins:cache"
     compile "org.hibernate:hibernate-ehcache"
     compile "org.grails.plugins:scaffolding"
-    compile("org.elasticsearch:elasticsearch-groovy:2.0.0") {
+
+    compile "org.elasticsearch:elasticsearch:2.2.0"
+
+    // Latest is 2.1.2
+    compile("org.elasticsearch:elasticsearch-groovy:2.1.2") {
       exclude group:'org.codehaus.groovy', module:'groovy-all'
     }
+
+    // compile("org.elasticsearch:elasticsearch-groovy:2.0.0") {
+    //   exclude group:'org.codehaus.groovy', module:'groovy-all'
+    // }
 
     runtime "org.grails.plugins:asset-pipeline"
 
