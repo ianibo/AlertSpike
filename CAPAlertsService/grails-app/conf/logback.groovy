@@ -8,7 +8,8 @@ appender('STDOUT', ConsoleAppender) {
     }
 }
 
-root(INFO, ['STDOUT'])
+root(WARN, ['STDOUT'])
+logger 'grails.app.services', DEBUG
 logger 'grails.app.controllers', DEBUG
 // logger 'grails.app.controllers.uk', DEBUG
 // logger 'grails.plugin.springsecurity', WARN

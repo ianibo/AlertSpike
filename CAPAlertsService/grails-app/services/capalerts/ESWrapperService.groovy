@@ -37,6 +37,7 @@ class ESWrapperService {
   }
 
   def getClient() {
+    log.debug("getClient()");
     return esclient
   }
 
