@@ -7,6 +7,7 @@ class ProfileController {
   def ESWrapperService
 
   def index() { 
+    log.debug("ProfileController::index - list current alerts");
     def result = [:]
     result.alerts = AlertProfile.executeQuery('select ap from AlertProfile as ap where ap.name like ?',['%'], [max: 10, offset: 0]);
 
@@ -17,6 +18,8 @@ class ProfileController {
   }
 
   def feed() {
+    log.debug("ProfileController::feed(${params.id})");
+
 
     def result = [:]
     result.offset = 0;
@@ -27,6 +30,7 @@ class ProfileController {
     if ( ( params.id ) && ( esclient ) ) {
       result.alert = AlertProfile.get(params.id)
       if ( result.alert ) {
+        log.debug("Got feed ${result.alert.id} ${result.alert.name} ${result.alert.shapeType} ${result.alert.shapeCoordinates} ${result.alert.radius}");
 
         def query_str="*"
 
