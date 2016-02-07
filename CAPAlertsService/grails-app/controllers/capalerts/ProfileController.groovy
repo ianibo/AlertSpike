@@ -91,7 +91,9 @@ class ProfileController {
         log.debug("Got feed ${result.alert.id} ${result.alert.name} ${result.alert.shapeType} ${result.alert.shapeCoordinates} ${result.alert.radius}");
 
         def query_str="*"
-        def sq = [ [ [ 179, 89 ], [ -179, 89 ], [ -179, -89 ], [ 179, -89 ], [ 179, 89 ] ] ]
+        // def sq = [ [ [ 179, 89 ], [ -179, 89 ], [ -179, -89 ], [ 179, -89 ], [ 179, 89 ] ] ]
+        def sq = JSON.parse(result.alert.shapeCoordinates)
+        log.debug("Parsed query coordinates ${sq}");
 
         try {
 
