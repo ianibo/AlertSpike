@@ -142,8 +142,9 @@ class ProfileController {
                      }
 
           def search_response =  search_future.get()
-          log.debug("Got response: ${search_response}");
+          // log.debug("Got response: ${search_response}");
           result.hits = []
+          result.hitcount = search_response.hits.total
           search_response.hits.hits.each { hit ->
             log.debug("Adding hit ${hit}");
             result.hits.add(hit.source)
