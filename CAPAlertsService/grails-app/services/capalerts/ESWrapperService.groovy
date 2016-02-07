@@ -9,7 +9,6 @@ import org.elasticsearch.client.transport.TransportClient
 import org.elasticsearch.common.settings.Settings
 import org.elasticsearch.groovy.*
 import org.elasticsearch.common.transport.InetSocketTransportAddress
-import static org.elasticsearch.node.NodeBuilder.nodeBuilder
 
 @Transactional
 class ESWrapperService {

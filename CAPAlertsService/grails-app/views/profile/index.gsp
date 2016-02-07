@@ -11,15 +11,27 @@
       Shape : <input name="coordinates" type="text"></input><br/>
     </g:form>
 
-    <table>
-      <g:each in="${alerts}" var="p">
+    <table class="table table-striped table-bordered">
+      <thead>
         <tr>
-          <td>${p.name}</td>
-          <td>${p.shapeType}</td>
-          <td>${p.shapeCoordinates}</td>
-          <td>${p.radius}</td>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Coords</th>
+          <th>Radius</th>
         </tr>
-      </g:each>
+      </thead>
+      <tbody>
+        <g:each in="${alerts}" var="p">
+          <tr>
+            <td><g:link controller="profile" action="feed" id="${p.id}">${p.id}</g:link></td>
+            <td>${p.name}</td>
+            <td>${p.shapeType}</td>
+            <td>${p.shapeCoordinates}</td>
+            <td>${p.radius}</td>
+          </tr>
+        </g:each>
+      </tbody>
     </table>
   </body>
 </html>
