@@ -15,13 +15,14 @@ class BootStrap {
 
     assertProfile('World',
                   'polygon',
-                  '[ [ [ -180, -90 ], [ 180, -90 ], [ 180, 90 ], [ -180, 90 ], [ -180, -90 ] ] ]');
+                  '[ [ [ 179, 89 ], [ -179, 89 ], [ -179, -89 ], [ 179, -89 ], [ 179, 89 ] ] ]');
   }
 
   def destroy = {
   }
 
   def assertProfile(name, type, shape, radius=null) {
+    log.debug("assertProfile ${name}");
     def p = AlertProfile.findByName(name) ?: new AlertProfile(name:name, 
                                                               shapeType:type, 
                                                               shapeCoordinates:shape,
