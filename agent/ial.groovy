@@ -258,6 +258,7 @@ def processEntry(title, rec_id, timestamp, url) {
   println("Add record ${ctr} -- contains ${es_record.areas.size()} area entries");
 
   def submit_start = System.currentTimeMillis();
+  es_record.agentts = submit_start
 
   try {
     def future = esclient.index {

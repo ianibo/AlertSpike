@@ -9,7 +9,7 @@ class ProfileController {
   def index() { 
     log.debug("ProfileController::index - list current alerts");
     def result = [:]
-    result.alerts = AlertProfile.executeQuery('select ap from AlertProfile as ap where ap.name like ?',['%'], [max: 10, offset: 0]);
+    result.alerts = AlertProfile.executeQuery('select ap from AlertProfile as ap where ap.name like :profileNameQry',[profileNameQry:'%'], [max: 10, offset: 0]);
 
     withFormat {
       html result
@@ -110,7 +110,8 @@ class ProfileController {
                          query {
                            bool {
                              must {
-                               match_all {}
+                               query_string (query: '*')
+                               // match_all {}
                              }
                              filter {
                                nested {
@@ -130,6 +131,9 @@ class ProfileController {
                              }
                            }
                          }
+                         sort = [
+                           agentts : [order : "desc"]
+                         ]
 
                          // facets {
                          //   'Component Type' {
@@ -143,8 +147,8 @@ class ProfileController {
 
           def search_response =  search_future.get()
           // log.debug("Got response: ${search_response}");
-          result.hits = []
           result.hitcount = search_response.hits.totalHits
+          result.hits = []
           search_response.hits.hits.each { hit ->
             log.debug("Adding hit ${hit}");
             result.hits.add(hit.source)
