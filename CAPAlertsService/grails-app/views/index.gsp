@@ -2,7 +2,7 @@
 <html>
     <head>
         <meta name="layout" content="main"/>
-        <title>Welcome to Grails</title>
+        <title>CAP Geo Feed</title>
     </head>
     <body>
       <div class="container">
