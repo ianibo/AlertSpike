@@ -40,16 +40,14 @@ class ProfileController {
 
         try {
 
-          def search_future = esclient.search {
+          def search_future = null;
+          if ( result.alert.shapeType.equalsIgnoreCase('polygon') ) {
+            search_future = esclient.search {
                        indices 'alerts'
                        types 'alert'
                        source {
                          from = result.offset
                          size = result.max
-                         // query {
-                         //   query_string (query: query_str)
-                         // }
-
                          query {
                            bool {
                              must {
@@ -87,6 +85,45 @@ class ProfileController {
                          // }
                        }
                      }
+          }
+          else {
+            search_future = esclient.search {
+                       indices 'alerts'
+                       types 'alert'
+                       source {
+                         from = result.offset
+                         size = result.max
+                         query {
+                           bool {
+                             must {
+                               query_string (query: '*')
+                               // match_all {}
+                             }
+                             filter {
+                               nested {
+                                 path = 'areas'
+                                 filter {
+                                   geo_shape {
+                                     areas.alertShape {
+                                       shape {
+                                         type = "circle"
+                                         coordinates = sq // result.alert.shapeCoordinates
+                                         radius =  result.alert.radius
+                                       }
+                                       relation = "intersects"
+                                     }
+                                   }
+                                 }
+                               }
+                             }
+                           }
+                         }
+                         sort = [
+                           agentts : [order : "desc"]
+                         ]
+                       }
+                     }
+          }
 
           def search_response =  search_future.get()
           // log.debug("Got response: ${search_response}");
@@ -121,12 +158,42 @@ class ProfileController {
 
   def asAtom(searchResult) {
     
+    // <feed xmlns="http://www.w3.org/2005/Atom">
+    //   <title>Example Feed</title>
+    //   <link href="http://example.org/"/>
+    //   <updated>2003-12-13T18:30:02Z</updated>
+    //   <author>
+    //     <name>John Doe</name>
+    //   </author>
+    //   <id>urn:uuid:60a76c80-d399-11d9-b93C-0003939e0af6</id>
+    //   <entry>
+    //     <title>Atom-Powered Robots Run Amok</title>
+    //     <link href="http://example.org/2003/12/13/atom03"/>
+    //     <id>urn:uuid:1225c695-cfb8-4ebb-aaaa-80da344efa6a</id>
+    //     <updated>2003-12-13T18:30:02Z</updated>
+    //     <summary>Some text.</summary>
+    //   </entry>
+    // </feed>
+
+
+
     def writer = new StringWriter()
     def xml = new groovy.xml.MarkupBuilder(writer)
-    xml.langs(type:"current"){
-      language("Java")
-      language("Groovy")
-      language("JavaScript")
+    xml.feed(xmlns:"http://www.w3.org/2005/Atom"){
+      title("CAP GEO Alerts")
+      updated("Updated")
+      author {
+        name("Test Name")
+      }
+      searchResult.hits.each { h ->
+        entry {
+          title(h.headline)
+          summary(h.description)
+          linkw(h.web)
+          // updated(h.description)
+          // id(h.description)
+        }
+      }
     }
     writer.toString()
   }
