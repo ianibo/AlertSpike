@@ -9,7 +9,7 @@
           Use this form to upload a comma separated .csv file of the form
           <pre>
 profileName,shapeType,coordinates,radius
-"Flagstaff Co. near Killam and Sedgewick",polygon,"[[[-111.5995,52.9305],[-111.876,52.6676],[-111.9873,52.9598],[-111.8906,52.9597],[-111.5995,52.9305]]]"
+"Flagstaff Co. near Killam and Sedgewick","polygon","[[[-111.5995,52.9305],[-111.876,52.6676],[-111.9873,52.9598],[-111.8906,52.9597],[-111.5995,52.9305]]]"
 "Sheffield, UK", "circle","[ -1.466944, 53.383611 ]","5000m"
 "World","polygon","[ [ [ 179, 89 ], [ -179, 89 ], [ -179, -89 ], [ 179, -89 ], [ 179, 89 ] ] ]"
           </pre>

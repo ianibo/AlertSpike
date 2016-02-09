@@ -37,9 +37,11 @@ class AdminController {
 
     def csv = new CSVReader(new InputStreamReader(content.inputStream,java.nio.charset.Charset.forName(charset)),',' as char,'"' as char)
     String[] header = csv.readNext()
+    log.debug("Process header ${header}");
     String[] nl=csv.readNext()
     int rownum = 0;
     while(nl!=null) {
+      log.debug("Process profile line ${nl}");
       nl=csv.readNext()
     }
 
