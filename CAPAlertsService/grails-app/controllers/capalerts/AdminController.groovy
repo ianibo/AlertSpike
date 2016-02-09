@@ -4,6 +4,12 @@ import grails.converters.JSON
 import grails.converters.XML
 import grails.plugin.springsecurity.annotation.Secured
 
+import au.com.bytecode.opencsv.CSVReader
+import au.com.bytecode.opencsv.bean.CsvToBean
+import au.com.bytecode.opencsv.bean.HeaderColumnNameMappingStrategy
+import au.com.bytecode.opencsv.bean.HeaderColumnNameTranslateMappingStrategy
+
+
 
 class AdminController {
 
@@ -18,5 +24,25 @@ class AdminController {
       html result
       json { render result as JSON }
     }
+  }
+
+  
+  @Secured(['ROLE_USER','IS_AUTHENTICATED_FULLY'])
+  def uploadProfiles() {
+
+    def upload_mime_type = request.getFile("content")?.contentType  // getPart?
+    def upload_filename = request.getFile("content")?.getOriginalFilename()
+    def content = request.getFile("content")
+    def charset='UTF-8'
+
+    def csv = new CSVReader(new InputStreamReader(content.inputStream,java.nio.charset.Charset.forName(charset)),',' as char,'"' as char)
+    String[] header = csv.readNext()
+    String[] nl=csv.readNext()
+    int rownum = 0;
+    while(nl!=null) {
+      nl=csv.readNext()
+    }
+
+    redirect ( view:'index' )
   }
 }
