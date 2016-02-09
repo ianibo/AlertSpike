@@ -29,7 +29,10 @@ class ProfileController {
     def esclient = ESWrapperService.getClient();
 
     if ( ( params.id ) && ( esclient ) ) {
-      result.alert = AlertProfile.get(params.id)
+      result.alert = AlertProfile.findByShortcode(params.id)
+      if ( result.alert == null ) {
+        result.alert = AlertProfile.get(params.id)
+      }
       if ( result.alert ) {
         log.debug("Got feed ${result.alert.id} ${result.alert.name} ${result.alert.shapeType} ${result.alert.shapeCoordinates} ${result.alert.radius}");
 
@@ -158,25 +161,6 @@ class ProfileController {
 
   def asAtom(searchResult) {
     
-    // <feed xmlns="http://www.w3.org/2005/Atom">
-    //   <title>Example Feed</title>
-    //   <link href="http://example.org/"/>
-    //   <updated>2003-12-13T18:30:02Z</updated>
-    //   <author>
-    //     <name>John Doe</name>
-    //   </author>
-    //   <id>urn:uuid:60a76c80-d399-11d9-b93C-0003939e0af6</id>
-    //   <entry>
-    //     <title>Atom-Powered Robots Run Amok</title>
-    //     <link href="http://example.org/2003/12/13/atom03"/>
-    //     <id>urn:uuid:1225c695-cfb8-4ebb-aaaa-80da344efa6a</id>
-    //     <updated>2003-12-13T18:30:02Z</updated>
-    //     <summary>Some text.</summary>
-    //   </entry>
-    // </feed>
-
-
-
     def writer = new StringWriter()
     def xml = new groovy.xml.MarkupBuilder(writer)
     xml.feed(xmlns:"http://www.w3.org/2005/Atom"){
@@ -187,9 +171,19 @@ class ProfileController {
       }
       searchResult.hits.each { h ->
         entry {
-          title(h.headline)
-          summary(h.description)
-          linkw(h.web)
+          title(h.headline ?: h.web)
+          summary("${(h.areas.collect {it.label}).join(', ')} ${h.description}")
+          xml.'link'(h.web)
+          areas {
+            h.areas.each { a ->
+              area {
+                label(a.label)
+                shapeType(a.alertShape.type)
+                coordinates(a.alertShape.coordinates)
+                radius(a.alertShape.radius)
+              }
+            }
+          }
           // updated(h.description)
           // id(h.description)
         }
