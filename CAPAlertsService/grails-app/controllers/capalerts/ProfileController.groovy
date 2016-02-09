@@ -113,10 +113,22 @@ class ProfileController {
       html result
       json { render result as JSON }
       atom { 
-        render result as XML 
+        render(text: asAtom(result), contentType: "text/xml")
       }
     }
 
+  }
+
+  def asAtom(searchResult) {
+    
+    def writer = new StringWriter()
+    def xml = new groovy.xml.MarkupBuilder(writer)
+    xml.langs(type:"current"){
+      language("Java")
+      language("Groovy")
+      language("JavaScript")
+    }
+    writer.toString()
   }
 
 }
