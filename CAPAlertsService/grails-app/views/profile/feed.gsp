@@ -1,4 +1,8 @@
-feed.gsp
+<html>
+<head>
+  <meta name="layout" content="main"/>
+</head>
+<body>
 <ul>
   <g:each in="${hits}" var="h">
     <li>
@@ -6,4 +10,6 @@ feed.gsp
     </li>
   </g:each>
 </ul>
+</body>
+</html>
 
