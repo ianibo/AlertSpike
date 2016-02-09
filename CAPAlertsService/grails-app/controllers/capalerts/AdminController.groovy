@@ -42,9 +42,17 @@ class AdminController {
     int rownum = 0;
     while(nl!=null) {
       log.debug("Process profile line ${nl}");
+      def p = AlertProfile.findByShortcode(nl[1]) 
+      if ( p == null ) { 
+        log.debug("Create new profile ${nl[0]}");
+        def r = ( nl.length == 5 ) ? nl[4] : null
+        p= new AlertProfile(name:nl[0], shortcode:nl[1],shapeType:nl[2], shapeCoordinates:nl[3], radius:r).save(flush:true, failOnError:true);
+      }
       nl=csv.readNext()
     }
 
     redirect ( view:'index' )
   }
+
+
 }

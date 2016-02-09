@@ -3,6 +3,7 @@ package capalerts
 class AlertProfile {
 
   String name
+  String shortcode
   String shapeType
   String shapeCoordinates
   String radius
