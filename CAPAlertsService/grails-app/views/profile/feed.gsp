@@ -31,7 +31,17 @@ html,body {width:100%;height:100%;margin:0;padding:0;}
           agentts:"${g.agentts}", 
           sourcets:"${g.sourcets}", 
           urgency:"${g.urgency}", 
-          severity:"${g.severity}"
+          severity:"${g.severity}",
+          areas:[
+            <g:each in="${g.areas}" var="a">
+              {
+                label:"${a.label}",
+                shapeType:"${a.alertShape.type}",
+                coordinates:${a.alertShape.coordinates},
+                radius:"${a.alertShape.radius}"
+              }
+            </g:each>
+          ]
         },
       </g:each>
     ];
