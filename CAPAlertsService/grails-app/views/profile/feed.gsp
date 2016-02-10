@@ -35,10 +35,14 @@ html,body {width:100%;height:100%;margin:0;padding:0;}
             </tr>
           </thead>
           <tbody>
-            <g:each in="${hits}" var="h">
+            <g:each in="${hits}" var="h" status="i">
               <tr>
-                <td><a href="${h.web}">${h.headline}</a> [${h.category}]<br/>
-                ${h.description}</td>
+                <td>
+                  <button class="btn pull-right btn-info" onClick="showAlert(${i})">Show</button>
+                  <a href="${h.web}">${h.headline}</a> ${h.sourcets}<br/>
+                  ${h.description}<br/>
+                  [${h.category}]
+                </td>
               </tr>
             </g:each>
           </tbody>
@@ -49,8 +53,9 @@ html,body {width:100%;height:100%;margin:0;padding:0;}
   <script language="JavaScript">
 
     var alerts = [
-      <g:each in="${hits}" var="g">
-        { 
+      <g:each in="${hits}" var="g" status="i">
+        {
+          pageid:${i},
           headline:"${g.headline}", 
           category:"${g.category}", 
           description:"${g.description}", 
@@ -76,34 +81,66 @@ html,body {width:100%;height:100%;margin:0;padding:0;}
     ];
 
     $(document).ready(function() {
-      var map = L.map('map').setView([51.505, -0.09], 13);
+      var map = L.map('map').setView([51.505, -0.09], 1);
       L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
           attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
       }).addTo(map);
+
+      var lg = L.featureGroup([]);
 
       var l = alerts.length;
       for (var i = 0; i < l; i++) {
         console.log("Adding geometry %o",alerts[i].areas[0]);
 
-        var geojsonFeature = {
-          "type": "Feature",
-          "properties": {
-              "name": alerts[i].headline,
-          },
-          "geometry": {
-          }
-        }
         if ( alerts[i].areas[0].shapeType === 'polygon' ) {
+          var geojsonFeature = {
+            "type": "Feature",
+            "properties": {
+                "name": alerts[i].headline,
+            },
+            "geometry": {
+            }
+          }
           geojsonFeature.geometry.type='Polygon';
           geojsonFeature.geometry.coordinates=alerts[i].areas[0].coordinates;
-          L.geoJson(geojsonFeature).addTo(map);
+          var feature = L.geoJson(geojsonFeature);
+          feature.addTo(map);
+          feature.addLayer(lg);
         }
         else {
-          // geojsonFeature.geometry.type='Circle';
-          // geojsonFeature.geometry.coordinates=alerts[i].areas[0].coordinates;
-          // geojsonFeature.geometry.radius=alerts[i].areas[0].radius
+
+          var geojsonFeature = {
+              "type": "Feature",
+              "properties": {
+                  "name": alerts[i].headline,
+              },
+              "geometry": {
+                  "type": "Point",
+                  "coordinates": alerts[i].areas[0].coordinates
+              }
+          };
+
+          var geojsonMarkerOptions = {
+              radius: 8,
+              fillColor: "#ff7800",
+              color: "#005",
+              weight: 1,
+              opacity: 1,
+              fillOpacity: 0.4
+          };
+
+          var latlng = L.latLng( alerts[i].areas[0].coordinates[1], alerts[i].areas[0].coordinates[0]);
+
+          var feature = L.geoJson(geojsonFeature, {
+              pointToLayer: function (feature, latlng) {
+                  return L.circleMarker(latlng, geojsonMarkerOptions);
+              }
+          });
+          feature.addTo(map);
+          feature.addLayer(lg);
         }
       }
+      // map.fitBounds(lg.getBounds()); 
     });
   </script>
 </body>
