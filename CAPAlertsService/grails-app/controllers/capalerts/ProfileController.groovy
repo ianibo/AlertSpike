@@ -24,7 +24,7 @@ class ProfileController {
 
     def result = [:]
     result.offset = 0;
-    result.max = 10;
+    result.max = 50;
 
     def esclient = ESWrapperService.getClient();
 
