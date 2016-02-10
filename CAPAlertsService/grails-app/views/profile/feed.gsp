@@ -18,34 +18,6 @@ html,body {width:100%;height:100%;margin:0;padding:0;}
   margin-top:100px;
 }
   </style>
-  <script language="JavaScript">
-    var alerts = [
-      <g:each in="${hits}" var="g">
-        { 
-          headline:"${g.headline}", 
-          category:"${g.category}", 
-          description:"${g.description}", 
-          instruction:"${g.instruction}", 
-          web:"${g.headline}", 
-          event:"${g.event}", 
-          agentts:"${g.agentts}", 
-          sourcets:"${g.sourcets}", 
-          urgency:"${g.urgency}", 
-          severity:"${g.severity}",
-          areas:[
-            <g:each in="${g.areas}" var="a">
-              {
-                label:"${a.label}",
-                shapeType:"${a.alertShape.type}",
-                coordinates:${a.alertShape.coordinates},
-                radius:"${a.alertShape.radius}"
-              }
-            </g:each>
-          ]
-        },
-      </g:each>
-    ];
-  </script>
 </head>
 <body>
   <div class="container-fluid main">
@@ -75,10 +47,45 @@ html,body {width:100%;height:100%;margin:0;padding:0;}
     </div>
   </div>
   <script language="JavaScript">
-    var map = L.map('map').setView([51.505, -0.09], 13);
-    L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(map);
+
+    var alerts = [
+      <g:each in="${hits}" var="g">
+        { 
+          headline:"${g.headline}", 
+          category:"${g.category}", 
+          description:"${g.description}", 
+          instruction:"${g.instruction}", 
+          web:"${g.headline}", 
+          event:"${g.event}", 
+          agentts:"${g.agentts}", 
+          sourcets:"${g.sourcets}", 
+          urgency:"${g.urgency}", 
+          severity:"${g.severity}",
+          areas:[
+            <g:each in="${g.areas}" var="a">
+              {
+                label:"${a.label}",
+                shapeType:"${a.alertShape.type}",
+                coordinates:${a.alertShape.coordinates},
+                radius:"${a.alertShape.radius}"
+              },
+            </g:each>
+          ]
+        },
+      </g:each>
+    ];
+
+    $(document).ready(function() {
+      var map = L.map('map').setView([51.505, -0.09], 13);
+      L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+      }).addTo(map);
+
+      var l = alerts.length;
+      for (var i = 0; i < l; i++) {
+        console.log("%o",alerts[i]);
+      }
+    });
   </script>
 </body>
 </html>
