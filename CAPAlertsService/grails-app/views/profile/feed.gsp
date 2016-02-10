@@ -80,8 +80,10 @@ html,body {width:100%;height:100%;margin:0;padding:0;}
       </g:each>
     ];
 
+    var map = null;
+
     $(document).ready(function() {
-      var map = L.map('map').setView([51.505, -0.09], 1);
+      map = L.map('map').setView([51.505, -0.09], 1);
       L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
           attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
       }).addTo(map);
@@ -90,7 +92,7 @@ html,body {width:100%;height:100%;margin:0;padding:0;}
 
       var l = alerts.length;
       for (var i = 0; i < l; i++) {
-        console.log("Adding geometry %o",alerts[i].areas[0]);
+        // console.log("Adding geometry %o",alerts[i].areas[0]);
 
         if ( alerts[i].areas[0].shapeType === 'polygon' ) {
           var geojsonFeature = {
@@ -106,6 +108,7 @@ html,body {width:100%;height:100%;margin:0;padding:0;}
           var feature = L.geoJson(geojsonFeature);
           feature.addTo(map);
           feature.addLayer(lg);
+          alerts[i].feature = feature;
         }
         else {
 
@@ -139,10 +142,15 @@ html,body {width:100%;height:100%;margin:0;padding:0;}
           });
           feature.addTo(map);
           feature.addLayer(lg);
+          alerts[i].feature = feature;
         }
       }
       // map.fitBounds(lg.getBounds()); 
     });
+
+    function showAlert(id) {
+      map.fitBounds(alerts[id].feature.getBounds());
+    }
   </script>
 </body>
 </html>
