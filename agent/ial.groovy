@@ -57,6 +57,12 @@ infoFields = [
     language:[element:'language',    langstring:false,    json_element:'language'],
     category:[element:'category',    langstring:false,    json_element:'category'],
        event:[element:'event',       langstring:true,     json_element:'event'],
+responseType:[element:'responseType',langstring:true,     json_element:'responseType'],
+     urgency:[element:'urgency',     langstring:true,     json_element:'urgency'],
+    severity:[element:'severity',    langstring:true,     json_element:'severity'],
+   certainty:[element:'certainty',   langstring:true,     json_element:'certainty'],
+  senderName:[element:'senderName',  langstring:true,     json_element:'senderName'],
+     expires:[element:'expires',     langstring:true,     json_element:'expires'],
       source:[element:'source',      langstring:true,     json_element:'source'],
        scope:[element:'scope',       langstring:true,     json_element:'scope'],
     headline:[element:'headline',    langstring:true,     json_element:'headline'],
@@ -184,6 +190,35 @@ def doUpdate(baseurl) {
     System.exit(1)
   }
 }
+
+// <cap:alert xmlns:cap="urn:oasis:names:tc:emergency:cap:1.1">
+//   <cap:identifier>urn:oid:2.49.0.3.1.127.2016.2.10.8.40.59</cap:identifier>
+//   <cap:sender>Eliot.Christian@redcross.org</cap:sender>
+//   <cap:sent>2016-02-10T08:40:59-00:00</cap:sent>
+//   <cap:status>Exercise</cap:status>
+//   <cap:msgType>Update</cap:msgType>
+//   <cap:scope>Restricted</cap:scope>
+//   <cap:info>
+//     <cap:language>en</cap:language>
+//     <cap:category>Geo</cap:category>
+//     <cap:event>tsunami</cap:event>
+//     <cap:responseType>Evacuate</cap:responseType>
+//     <cap:urgency>Past</cap:urgency>
+//     <cap:severity>Minor</cap:severity>
+//     <cap:certainty>Unlikely</cap:certainty>
+//     <cap:expires>2016-02-10T10:40:59-00:00</cap:expires>
+//     <cap:senderName>New Zealand Red Cross</cap:senderName>
+//     <cap:headline>Tsunami warning for New Zealand</cap:headline>
+//     <cap:description>A tsunami is expected soon.</cap:description>
+//     <cap:instruction>Move away from the shore.</cap:instruction>
+//     <cap:area>
+//       <cap:areaDesc>New Zealand</cap:areaDesc>
+//       <cap:polygon>-34.1,170.1 -39.7,169.8 -39.7,179.9 -34,179.9 -34.1,170.1</cap:polygon>
+//       <cap:circle>-44.3,174.9 675</cap:circle>
+//     </cap:area>
+//   </cap:info>
+// </cap:alert>
+
 
 def processEntry(title, rec_id, timestamp, url) {
 
