@@ -10,7 +10,7 @@ class ProfileController {
   def index() { 
     log.debug("ProfileController::index - list current alerts");
     def result = [:]
-    result.alerts = AlertProfile.executeQuery('select ap from AlertProfile as ap where ap.name like :profileNameQry',[profileNameQry:'%'], [max: 10, offset: 0]);
+    result.alerts = AlertProfile.executeQuery('select ap from AlertProfile as ap where ap.name like :profileNameQry',[profileNameQry:'%'], [max: 20, offset: 0]);
 
     withFormat {
       html result
@@ -24,7 +24,7 @@ class ProfileController {
 
     def result = [:]
     result.offset = 0;
-    result.max = 10;
+    result.max = 50;
 
     def esclient = ESWrapperService.getClient();
 

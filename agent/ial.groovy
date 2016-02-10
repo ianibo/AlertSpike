@@ -259,6 +259,7 @@ def processEntry(title, rec_id, timestamp, url) {
 
   def submit_start = System.currentTimeMillis();
   es_record.agentts = submit_start
+  es_record.sourcets = timestamp
 
   try {
     def future = esclient.index {
