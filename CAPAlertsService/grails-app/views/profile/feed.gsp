@@ -12,12 +12,15 @@ html,body {width:100%;height:100%;margin:0;padding:0;}
     top:0;
     left:0;
     right:0;
-    margin-top:50px; /* adjust top margin to your header height */
+}
+
+.main {
+  margin-top:100px;
 }
   </style>
 </head>
 <body>
-  <div class="container-fluid">
+  <div class="container-fluid main">
     <div class="row">
       <div class="col-md-6">
          <div id="map"></div>
