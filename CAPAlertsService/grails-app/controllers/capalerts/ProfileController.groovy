@@ -3,6 +3,7 @@ package capalerts
 import grails.converters.JSON
 import grails.converters.XML
 
+// http://leafletjs.com/examples/geojson.html
 class ProfileController {
 
   def ESWrapperService

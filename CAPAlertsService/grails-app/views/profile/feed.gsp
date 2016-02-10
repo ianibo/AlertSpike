@@ -83,7 +83,26 @@ html,body {width:100%;height:100%;margin:0;padding:0;}
 
       var l = alerts.length;
       for (var i = 0; i < l; i++) {
-        console.log("%o",alerts[i]);
+        console.log("Adding geometry %o",alerts[i].areas[0]);
+
+        var geojsonFeature = {
+          "type": "Feature",
+          "properties": {
+              "name": alerts[i].headline,
+          },
+          "geometry": {
+          }
+        }
+        if ( alerts[i].areas[0].shapeType === 'polygon' ) {
+          geojsonFeature.geometry.type='Polygon';
+          geojsonFeature.geometry.coordinates=alerts[i].areas[0].coordinates;
+          L.geoJson(geojsonFeature).addTo(map);
+        }
+        else {
+          // geojsonFeature.geometry.type='Circle';
+          // geojsonFeature.geometry.coordinates=alerts[i].areas[0].coordinates;
+          // geojsonFeature.geometry.radius=alerts[i].areas[0].radius
+        }
       }
     });
   </script>
