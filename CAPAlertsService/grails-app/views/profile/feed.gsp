@@ -133,7 +133,8 @@ html,body {width:100%;height:100%;margin:0;padding:0;}
 
           var feature = L.geoJson(geojsonFeature, {
               pointToLayer: function (feature, latlng) {
-                  return L.circleMarker(latlng, geojsonMarkerOptions);
+                  // return L.circleMarker(latlng, geojsonMarkerOptions);
+                  return L.circle(latlng, alerts[i].areas[0].radius*1000, geojsonMarkerOptions);
               }
           });
           feature.addTo(map);
