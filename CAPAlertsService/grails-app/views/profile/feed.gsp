@@ -18,6 +18,24 @@ html,body {width:100%;height:100%;margin:0;padding:0;}
   margin-top:100px;
 }
   </style>
+  <script language="JavaScript">
+    var alerts = [
+      <g:each in="${hits}" var="g">
+        { 
+          headline:"${g.headline}", 
+          category:"${g.category}", 
+          description:"${g.description}", 
+          instruction:"${g.instruction}", 
+          web:"${g.headline}", 
+          event:"${g.event}", 
+          agentts:"${g.agentts}", 
+          sourcets:"${g.sourcets}", 
+          urgency:"${g.urgency}", 
+          severity:"${g.severity}"
+        },
+      </g:each>
+    ];
+  </script>
 </head>
 <body>
   <div class="container-fluid main">
