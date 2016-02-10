@@ -4,18 +4,12 @@
   <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
   <script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
   <style>
-html,body {width:100%;height:100%;margin:0;padding:0;}
-
 #map {
     height:800px;
     bottom:0;
     top:0;
     left:0;
     right:0;
-}
-
-.main {
-  margin-top:100px;
 }
   </style>
 </head>
@@ -25,7 +19,7 @@ html,body {width:100%;height:100%;margin:0;padding:0;}
       <div class="col-md-6">
          <div id="map"></div>
       </div>
-      <div class="col-md-6">
+      <div class="col-md-6" style="height:800px; overflow:scroll;">
         <g:link controller="profile" action="feed" id="${params.id}" params="${[format:'atom']}">ATOM</g:link>
         <g:link controller="profile" action="feed" id="${params.id}" params="${[format:'json']}">JSON</g:link>
         <table class="table table-striped table-bordered">
@@ -36,7 +30,7 @@ html,body {width:100%;height:100%;margin:0;padding:0;}
           </thead>
           <tbody>
             <g:each in="${hits}" var="h" status="i">
-              <tr>
+              <tr id="feature${i}" class="featureRow">
                 <td>
                   <button class="btn pull-right btn-info" onClick="showAlert(${i})">Show</button>
                   <a href="${h.web}">${h.headline}</a> ${h.sourcets}<br/>
@@ -81,6 +75,8 @@ html,body {width:100%;height:100%;margin:0;padding:0;}
     ];
 
     var map = null;
+    var autoShow = 0;
+    var autoShowTimer = null;
 
     $(document).ready(function() {
       map = L.map('map').setView([51.505, -0.09], 1);
@@ -146,10 +142,29 @@ html,body {width:100%;height:100%;margin:0;padding:0;}
         }
       }
       // map.fitBounds(lg.getBounds()); 
+
+      autoShowTimer = setInterval(autoAdvance,5000);
     });
+
+    function autoAdvance() {
+      autoShow++;
+      if ( autoShow == alerts.length ) {
+        autoShow = 0;
+      }
+      console.log("autoAdvance %d",autoShow);
+      showAlert(autoShow);
+      return true;
+    }
 
     function showAlert(id) {
       map.fitBounds(alerts[id].feature.getBounds());
+      var active_feature_div = document.getElementById('feature'+id);
+       $('.featureRow').css({
+         background:"#ffffff"
+       })
+      active_feature_div.scrollIntoView(true);
+      active_feature_div.style.background = '#F0F0F3';
+      active_feature_div.scrollIntoView(true);
     }
   </script>
 </body>
