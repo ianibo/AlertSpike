@@ -30,3 +30,31 @@ curl -XPUT 'http://localhost:9200/alerts/alert/_mapping' -d '
       }
    } 
 }' 
+curl -XPUT 'http://localhost:9200/alertSubscriptions/subscription/_mapping' -d ' 
+{ 
+   "alert":{ 
+      "properties":{ 
+         "id":{ 
+            "include_in_all":"false", 
+            "index":"not_analyzed", 
+            "type":"string", 
+            "store":"yes" 
+         }, 
+         "areas" : {
+           "type": "nested",
+           "properties":{
+             "alertShape": {
+                "type": "geo_shape",
+                "tree": "quadtree",
+                "precision": "100m"
+             },
+             "label":{
+               "type":"string", 
+               "store":"yes" 
+             }
+           }
+         }
+      }
+   } 
+}'
+

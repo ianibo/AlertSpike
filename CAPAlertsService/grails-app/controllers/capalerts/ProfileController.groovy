@@ -134,7 +134,7 @@ class ProfileController {
           result.hitcount = search_response.hits.totalHits
           result.hits = []
           search_response.hits.hits.each { hit ->
-            log.debug("Adding hit ${hit}");
+            // log.debug("Adding hit ${hit}");
             result.hits.add(hit.source)
           }
         }
