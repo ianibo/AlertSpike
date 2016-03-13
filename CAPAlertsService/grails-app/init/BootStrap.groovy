@@ -2,6 +2,8 @@ import capalerts.*;
 
 class BootStrap {
 
+  def pushService
+
   def init = { servletContext ->
 
     assertProfile('Flagstaff Co. near Killam and Sedgewick',
@@ -32,6 +34,7 @@ class BootStrap {
       UserRole.create admin, userRole
     }
 
+    pushService.pushPendingRecords()
   }
 
   def destroy = {

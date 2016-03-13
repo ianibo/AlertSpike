@@ -3,12 +3,16 @@ package capalerts
 import grails.transaction.Transactional
 
 
-import org.elasticsearch.node.Node
-import static org.elasticsearch.node.NodeBuilder.nodeBuilder
-import org.elasticsearch.client.transport.TransportClient
-import org.elasticsearch.common.settings.Settings
 import org.elasticsearch.groovy.*
-import org.elasticsearch.common.transport.InetSocketTransportAddress
+import org.hibernate.ScrollMode
+import java.nio.charset.Charset
+import java.util.GregorianCalendar
+import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse
+import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest
+import org.elasticsearch.action.admin.indices.flush.FlushRequest
+import org.elasticsearch.client.Client
+import org.elasticsearch.action.admin.indices.create.*
+
 
 @Transactional
 class PushService {
@@ -19,9 +23,30 @@ class PushService {
 
 
   def pushPendingRecords() {
+    log.debug("pushPendingRecords()");
+    pushActivity(ESWrapperService.client,capalerts.AlertProfile.class,'PushSubscriptions','alertssubscriptions', 'subscription') { alert_profile ->
+      log.debug("Pushing ${alert_profile}");
+      def result = [:]
+      // result.status = org.status?.value
+      result.recid = "${alert_profile.id}:capalerts.AlertProfile".toString()
+      result.name = alert_profile.name
+      //  String shortcode
+      //  String shapeType
+      //  String shapeCoordinates
+      //  String radius
+      //  Date dateCreated
+
+      // result.name = org.name
+      // result.sector = org.sector
+      // result.dbId = org.id
+      // result.visible = ['Public']
+      // result.rectype = 'Organisation'
+      result
+
+    }
   }
 
-  def pushActivity(esclient, domain, activity, recgen_closure) {
+  def pushActivity(esclient, domain, activity, es_index, rectype, recgen_closure) {
 
     def count = 0;
     try {
@@ -61,24 +86,30 @@ class PushService {
 
       while (results.next()) {
         Object r = results.get(0);
+
         def idx_record = recgen_closure(r)
+
+        log.debug("Index: ${idx_record}");
+
         def future;
-        if(idx_record['_id'] == null) {
+        if(idx_record['recid'] == null) {
           log.error("******** Record without an ID: ${idx_record} Obj:${r} ******** ")
           continue
         }
+
         if ( idx_record?.status?.toLowerCase() == 'deleted' ) {
             future = esclient.delete {
               index es_index
-              type domain.name
+              type rectype
               id idx_record['_id']
             }.actionGet()
         }
         else {
+          log.debug("Call index");
           future = esclient.index {
             index es_index
             type domain.name
-            id idx_record['_id']
+            id idx_record['recid']
             source idx_record
           }.actionGet()
         }
