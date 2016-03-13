@@ -42,19 +42,10 @@ curl -XPUT 'http://localhost:9200/alertssubscriptions/subscription/_mapping' -d 
             "type":"string", 
             "store":"yes" 
          }, 
-         "areas" : {
-           "type": "nested",
-           "properties":{
-             "alertShape": {
-                "type": "geo_shape",
-                "tree": "quadtree",
-                "precision": "100m"
-             },
-             "label":{
-               "type":"string", 
-               "store":"yes" 
-             }
-           }
+         "subshape": {
+            "type": "geo_shape",
+            "tree": "quadtree",
+            "precision": "100m"
          }
       }
    } 

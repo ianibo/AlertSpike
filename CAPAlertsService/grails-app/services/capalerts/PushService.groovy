@@ -30,17 +30,16 @@ class PushService {
       // result.status = org.status?.value
       result.recid = "${alert_profile.id}:capalerts.AlertProfile".toString()
       result.name = alert_profile.name
-      //  String shortcode
-      //  String shapeType
-      //  String shapeCoordinates
-      //  String radius
-      //  Date dateCreated
+      result.shortcode = alert_profile.shortcode
+      result.subshape = [
+          type:alert_profile.shapeType,
+          coordinates:alert_profile.shapeCoordinates
+      ]
 
-      // result.name = org.name
-      // result.sector = org.sector
-      // result.dbId = org.id
-      // result.visible = ['Public']
-      // result.rectype = 'Organisation'
+      if ( alert_profile.shapeType == 'circle' ) {
+        result.subshape.radius = alert_profile.radius
+      }
+
       result
 
     }
