@@ -13,10 +13,15 @@
 */
 
 body {
-  padding-top: 50px;
+  height:100%; 
+  /* overflow:hidden;  */
 }
 
 .starter-template {
   padding: 40px 15px;
   text-align: center;
+}
+
+.main {
+  padding-top:110px;
 }

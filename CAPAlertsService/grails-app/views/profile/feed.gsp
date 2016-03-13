@@ -4,18 +4,12 @@
   <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
   <script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
   <style>
-html,body {width:100%;height:100%;margin:0;padding:0;}
-
 #map {
     height:800px;
     bottom:0;
     top:0;
     left:0;
     right:0;
-}
-
-.main {
-  margin-top:100px;
 }
   </style>
 </head>
@@ -25,7 +19,7 @@ html,body {width:100%;height:100%;margin:0;padding:0;}
       <div class="col-md-6">
          <div id="map"></div>
       </div>
-      <div class="col-md-6">
+      <div class="col-md-6" style="height:800px; overflow:scroll;">
         <g:link controller="profile" action="feed" id="${params.id}" params="${[format:'atom']}">ATOM</g:link>
         <g:link controller="profile" action="feed" id="${params.id}" params="${[format:'json']}">JSON</g:link>
         <table class="table table-striped table-bordered">
@@ -36,7 +30,7 @@ html,body {width:100%;height:100%;margin:0;padding:0;}
           </thead>
           <tbody>
             <g:each in="${hits}" var="h" status="i">
-              <tr>
+              <tr id="feature${i}" class="featureRow">
                 <td>
                   <button class="btn pull-right btn-info" onClick="showAlert(${i})">Show</button>
                   <a href="${h.web}">${h.headline}</a> ${h.sourcets}<br/>
@@ -80,8 +74,12 @@ html,body {width:100%;height:100%;margin:0;padding:0;}
       </g:each>
     ];
 
+    var map = null;
+    var autoShow = 0;
+    var autoShowTimer = null;
+
     $(document).ready(function() {
-      var map = L.map('map').setView([51.505, -0.09], 1);
+      map = L.map('map').setView([51.505, -0.09], 1);
       L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
           attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
       }).addTo(map);
@@ -90,7 +88,7 @@ html,body {width:100%;height:100%;margin:0;padding:0;}
 
       var l = alerts.length;
       for (var i = 0; i < l; i++) {
-        console.log("Adding geometry %o",alerts[i].areas[0]);
+        // console.log("Adding geometry %o",alerts[i].areas[0]);
 
         if ( alerts[i].areas[0].shapeType === 'polygon' ) {
           var geojsonFeature = {
@@ -106,6 +104,7 @@ html,body {width:100%;height:100%;margin:0;padding:0;}
           var feature = L.geoJson(geojsonFeature);
           feature.addTo(map);
           feature.addLayer(lg);
+          alerts[i].feature = feature;
         }
         else {
 
@@ -133,15 +132,40 @@ html,body {width:100%;height:100%;margin:0;padding:0;}
 
           var feature = L.geoJson(geojsonFeature, {
               pointToLayer: function (feature, latlng) {
-                  return L.circleMarker(latlng, geojsonMarkerOptions);
+                  // return L.circleMarker(latlng, geojsonMarkerOptions);
+                  return L.circle(latlng, alerts[i].areas[0].radius*1000, geojsonMarkerOptions);
               }
           });
           feature.addTo(map);
           feature.addLayer(lg);
+          alerts[i].feature = feature;
         }
       }
       // map.fitBounds(lg.getBounds()); 
+
+      autoShowTimer = setInterval(autoAdvance,5000);
     });
+
+    function autoAdvance() {
+      autoShow++;
+      if ( autoShow == alerts.length ) {
+        autoShow = 0;
+      }
+      console.log("autoAdvance %d",autoShow);
+      showAlert(autoShow);
+      return true;
+    }
+
+    function showAlert(id) {
+      map.fitBounds(alerts[id].feature.getBounds());
+      var active_feature_div = document.getElementById('feature'+id);
+       $('.featureRow').css({
+         background:"#ffffff"
+       })
+      active_feature_div.scrollIntoView(true);
+      active_feature_div.style.background = '#F0F0F3';
+      active_feature_div.scrollIntoView(true);
+    }
   </script>
 </body>
 </html>
