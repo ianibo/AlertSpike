@@ -41,7 +41,8 @@ class FindSubsForAlert {
     }
 
     def findMatchingSubscriptions(shapeType, shapeCoordinates, radius) {
-
+ 
+      def result = [:]
       def es = new RESTClient("http://localhost:9200")
       def res = null;
 
@@ -105,8 +106,14 @@ class FindSubsForAlert {
                    ])
       }
 
-      println("res: ${res}");
+      println("res: ${res.data}");
+      if ( res?.data ) {
+        result.subscriptions = []
+        res.data.hits?.hits?.each { it ->
+          result.subscriptions.add([subid:it._source.recid, name:it._source.name, shortcode:it._source.shortcode])
+        }
+      }
 
-      return [res:res]
+      return result
     }
 }
