@@ -28,6 +28,7 @@ class AwsLambdaTest {
                               [ -91.6849, 49.8672 ], 
                               [ -92.7424, 49.0644 ] ] ]
       ]
+
       def result = fsfa.myHandler(data,context)
 
       println("Result: ${result}");

@@ -105,14 +105,8 @@ class FindSubsForAlert {
                    ])
       }
 
-      def search_response = search_future.get()
-      // result.hitcount = search_response.hits.totalHits
-      // result.hits = []
-      // search_response.hits.hits.each { hit ->
-      // // log.debug("Adding hit ${hit}");
-      // result.hits.add(hit.source)
-      // }
+      println("res: ${res}");
 
-      return [:]
+      return [res:res]
     }
 }
