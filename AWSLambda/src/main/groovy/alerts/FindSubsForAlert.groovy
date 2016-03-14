@@ -1,6 +1,19 @@
 package alerts
 
 import com.amazonaws.services.lambda.runtime.Context
+import groovyx.net.http.*
+import static groovyx.net.http.ContentType.URLENC
+import static groovyx.net.http.ContentType.*
+import static groovyx.net.http.Method.*
+import groovyx.net.http.*
+import org.apache.http.entity.mime.*
+import org.apache.http.entity.mime.content.*
+import java.nio.charset.Charset
+import static groovy.json.JsonOutput.*
+import groovy.json.JsonSlurper
+import java.text.SimpleDateFormat
+import java.net.InetAddress;
+
 
 class FindSubsForAlert {
 
@@ -44,7 +57,7 @@ class FindSubsForAlert {
                                  "shape": [
                                    "type": "polygon",
                                    "coordinates" : shapeCoordinates
-                                 ]
+                                 ],
                                  relation:'intersects'
                                ]
                              ]
@@ -74,7 +87,7 @@ class FindSubsForAlert {
                                    "type": "circle",
                                    "coordinates" : shapeCoordinates,
                                    "radius" : radius
-                                 ]
+                                 ],
                                  relation:'intersects'
                                ]
                              ]
