@@ -1,6 +1,8 @@
 package alerts
 
 import com.amazonaws.services.lambda.runtime.Context
+import com.amazonaws.services.lambda.runtime.LambdaLogger;
+
 import groovyx.net.http.*
 import static groovyx.net.http.ContentType.URLENC
 import static groovyx.net.http.ContentType.*
@@ -19,9 +21,12 @@ class FindSubsForAlert {
 
     public static final String ES_HOST = 'localhost';
 
+    // public static void handler(InputStream inputStream, OutputStream outputStream, Context context) {
     // Our lambda function handler
-    Map myHandler(data, Context context) {
+    public Map myHandler(data, Context context) {
 
+        // LambdaLogger logger = context.getLogger();
+        // logger.log("received : " + myCount);
         def result = null;
 
         // Input should be a JSON document with shapeType, shapeCoordinates and optionally radius if shapeType is circle
