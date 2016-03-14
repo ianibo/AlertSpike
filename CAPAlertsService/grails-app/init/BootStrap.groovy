@@ -34,6 +34,9 @@ class BootStrap {
       UserRole.create admin, userRole
     }
 
+    // Load test file from web-inf
+    loadDefaultSubscriptions()
+
     pushService.pushPendingRecords()
   }
 
@@ -47,5 +50,12 @@ class BootStrap {
                                                                         shapeType:type, 
                                                                         shapeCoordinates:shape,
                                                                         radius:radius).save(flush:true, failOnError:true);
+  }
+
+  def loadDefaultSubscriptions() {
+    def charset = 'ISO-8859-1' // 'UTF-8'
+    URL alerts_file = new URL('')
+    def csv = new CSVReader(new InputStreamReader(new org.apache.commons.io.input.BOMInputStream(new ByteArrayInputStream(the_data.fileData)),java.nio.charset.Charset.forName(charset)),'\t' as char,'\0' as char)
+ 
   }
 }
