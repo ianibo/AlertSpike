@@ -12,7 +12,7 @@ import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest
 import org.elasticsearch.action.admin.indices.flush.FlushRequest
 import org.elasticsearch.client.Client
 import org.elasticsearch.action.admin.indices.create.*
-
+import groovy.json.JsonSlurper
 
 @Transactional
 class PushService {
@@ -31,9 +31,10 @@ class PushService {
       result.recid = "${alert_profile.id}:capalerts.AlertProfile".toString()
       result.name = alert_profile.name
       result.shortcode = alert_profile.shortcode
+      def js =  new JsonSlurper()
       result.subshape = [
           type:alert_profile.shapeType,
-          coordinates:alert_profile.shapeCoordinates
+          coordinates:js.parseText(alert_profile.shapeCoordinates)
       ]
 
       if ( alert_profile.shapeType == 'circle' ) {

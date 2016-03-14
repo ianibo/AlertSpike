@@ -19,14 +19,7 @@ class AwsLambdaTest {
       FindSubsForAlert fsfa = new FindSubsForAlert()
       def data = [
         shapeType:'polygon',
-        shapeCoordinates: [ [ [ -92.7424, 49.0644 ], 
-                              [ -93.0991, 49.0813 ], 
-                              [ -93.4874, 49.0997 ], 
-                              [ -93.4875, 49.6218 ], 
-                              [ -92.918, 50.1283 ], 
-                              [ -91.6843, 49.8684 ], 
-                              [ -91.6849, 49.8672 ], 
-                              [ -92.7424, 49.0644 ] ] ]
+        shapeCoordinates: [ [ [-109.5297,40.4554], [-109.5298,40.4556], [-109.5299,40.4556], [-109.5299,40.4554], [-109.5297,40.4554] ] ]
       ]
 
       def result = fsfa.myHandler(data,context)

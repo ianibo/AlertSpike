@@ -32,9 +32,9 @@ curl -XPUT 'http://localhost:9200/alerts/alert/_mapping' -d '
 }' 
 curl -XDELETE 'http://localhost:9200/alertssubscriptions'
 curl -XPUT 'http://localhost:9200/alertssubscriptions'
-curl -XPUT 'http://localhost:9200/alertssubscriptions/subscription/_mapping' -d ' 
+curl -XPUT 'http://localhost:9200/alertssubscriptions/alertsubscription/_mapping' -d ' 
 { 
-   "subscription":{ 
+   "alertsubscription":{ 
       "properties":{ 
          "id":{ 
             "include_in_all":"false", 
