@@ -107,7 +107,7 @@ class PushService {
           log.debug("Call index");
           future = esclient.index {
             index es_index
-            type domain.name
+            type 'alertsubscription'
             id idx_record['recid']
             source idx_record
           }.actionGet()
