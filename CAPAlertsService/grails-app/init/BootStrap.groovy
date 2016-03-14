@@ -1,5 +1,11 @@
 import capalerts.*;
 
+import au.com.bytecode.opencsv.CSVReader
+import au.com.bytecode.opencsv.bean.CsvToBean
+import au.com.bytecode.opencsv.bean.HeaderColumnNameMappingStrategy
+import au.com.bytecode.opencsv.bean.HeaderColumnNameTranslateMappingStrategy
+
+
 class BootStrap {
 
   def pushService
@@ -53,9 +59,29 @@ class BootStrap {
   }
 
   def loadDefaultSubscriptions() {
-    def charset = 'ISO-8859-1' // 'UTF-8'
-    URL alerts_file = new URL('')
-    def csv = new CSVReader(new InputStreamReader(new org.apache.commons.io.input.BOMInputStream(new ByteArrayInputStream(the_data.fileData)),java.nio.charset.Charset.forName(charset)),'\t' as char,'\0' as char)
+    try {
+      def charset = 'UTF-8'
+      URL alerts_file = new URL('https://raw.githubusercontent.com/ianibo/AlertSpike/master/testdata/alertHubSubscriptions.txt')
+      def csv = new CSVReader(new InputStreamReader(new org.apache.commons.io.input.BOMInputStream(alerts_file.openStream()),java.nio.charset.Charset.forName(charset)),'\t' as char,'"' as char)
+
+      String[] header = csv.readNext()
+      String[] nl=csv.readNext()
+      while(nl!=null) {
+        log.debug(" -> ${nl.length} ${nl[0]} ${nl[2]} ${nl[10]} ${nl[11]}");
+        def radius = nl.length > 12 ? nl[12] : null
+        // Add extra [] to make it into an array of shapes
+        try {
+          assertProfile(nl[2], nl[0], nl[10], "[ ${nl[11]} ]", radius)
+        }
+        catch ( Exception e ) {
+          e.printStackTrace();
+        }
+        nl=csv.readNext()
+      }
+    }
+    catch( Exception e) {
+      e.printStackTrace();
+    }
  
   }
 }

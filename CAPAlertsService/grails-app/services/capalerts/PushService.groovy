@@ -59,7 +59,7 @@ class PushService {
         latest_ft_record=new PushCursor(domainClassName:domain.name,activity:activity,lastTimestamp:0)
       }
 
-      log.debug("updatei ${activity} ${domain.name} since ${latest_ft_record.lastTimestamp}");
+      log.debug("update ${activity} ${domain.name} since ${latest_ft_record.lastTimestamp}");
       def total = 0;
       Date from = new Date(latest_ft_record.lastTimestamp);
       // def qry = domain.findAllByLastUpdatedGreaterThan(from,[sort:'lastUpdated']);
@@ -97,21 +97,25 @@ class PushService {
           continue
         }
 
-        if ( idx_record?.status?.toLowerCase() == 'deleted' ) {
+        try {
+          if ( idx_record?.status?.toLowerCase() == 'deleted' ) {
             future = esclient.delete {
               index es_index
               type rectype
               id idx_record['_id']
             }.actionGet()
+          }
+          else {
+            future = esclient.index {
+              index es_index
+              type 'alertsubscription'
+              id idx_record['recid']
+              source idx_record
+            }.actionGet()
+          }
         }
-        else {
-          log.debug("Call index");
-          future = esclient.index {
-            index es_index
-            type 'alertsubscription'
-            id idx_record['recid']
-            source idx_record
-          }.actionGet()
+        catch ( Exception e ) {
+          e.printStackTrace()
         }
 
         latest_ft_record.lastTimestamp = r.lastUpdated?.getTime()
@@ -122,7 +126,6 @@ class PushService {
           count = 0;
           log.debug("processed ${++total} records (${domain.name})");
           latest_ft_record.save(flush:true);
-          cleanUpGorm();
         }
       }
       results.close();
