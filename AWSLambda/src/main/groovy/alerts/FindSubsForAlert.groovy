@@ -108,6 +108,7 @@ class FindSubsForAlert {
       }
 
       println("res: ${res.data}");
+
       if ( res?.data ) {
         result.subscriptions = []
         res.data.hits?.hits?.each { it ->
