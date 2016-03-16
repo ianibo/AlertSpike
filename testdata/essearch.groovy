@@ -35,12 +35,13 @@ println result;
 
 def searchForSubscriptions() {
   def result = [:]
-  def es = new RESTClient("http://localhost:9200")
+  def es = new RESTClient("http://ce.semweb.co")
+  // def es = new RESTClient("http://localhost:9200")
   // result.r = es.get(path:"/alertssubscriptions/_search",
   //                   query:[
   //                     q:'*'
   //                   ])
-  def res = es.post(path:"/alertssubscriptions/_search",
+  def res = es.post(path:"/es/alertssubscriptions/_search",
                    requestContentType: JSON,
                    body:[
                      "query":[
@@ -55,7 +56,8 @@ def searchForSubscriptions() {
                                    "type": "circle",
                                    "coordinates" : [-109.5288,40.4555],
                                    "radius" : "1000m"
-                                 ]
+                                 ],
+                                 relation:'intersects'
                                ]
                              ]
                            ]
@@ -63,5 +65,5 @@ def searchForSubscriptions() {
                        ]
                    ])
     
-  result
+  res.data
 }
