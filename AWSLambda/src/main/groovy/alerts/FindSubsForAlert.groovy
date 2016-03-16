@@ -43,11 +43,12 @@ class FindSubsForAlert {
     def findMatchingSubscriptions(shapeType, shapeCoordinates, radius) {
  
       def result = [:]
-      def es = new RESTClient("http://localhost:9200")
+      // def es = new RESTClient("http://localhost:9200")
+      def es = new RESTClient("http://ce.semweb.co")
       def res = null;
 
       if ( shapeType.equalsIgnoreCase('polygon') ) {
-        res = es.post(path:"/alertssubscriptions/_search",
+        res = es.post(path:"/es/alertssubscriptions/_search",
                    requestContentType: JSON,
                    body:[
                      "from":0,
