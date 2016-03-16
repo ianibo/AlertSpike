@@ -19,8 +19,6 @@ import java.net.InetAddress;
 
 class FindSubsForAlert {
 
-    public static final String ES_HOST = 'localhost';
-
     // public static void handler(InputStream inputStream, OutputStream outputStream, Context context) {
     // Our lambda function handler
     public Map myHandler(data, Context context) {
