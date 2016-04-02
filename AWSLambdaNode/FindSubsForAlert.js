@@ -44,6 +44,8 @@ exports.handler = function(event, context) {
       alerts.push(event.Message);
     }
 
+    console.log("alerts: %o",alerts);
+
     var sns = send_sns ? new aws.SNS() : null;
 
     for (var i = 0; i < num_alerts; i++) {
