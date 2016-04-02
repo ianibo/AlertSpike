@@ -21,7 +21,7 @@ var s3 = new aws.S3({ apiVersion: '2006-03-01' });
  */
 exports.handler = function(event, context) {
 
-    console.log("Event %o",event);
+    // console.log("Event %o",event);
 
     var shape = null;
     var send_sns = 0;
@@ -37,7 +37,7 @@ exports.handler = function(event, context) {
         // console.log("Pushing %o",event.Records[i].Sns.Message);
         alerts.push(JSON.parse(event.Records[i].Sns.Message));
       }
-      send_sns = 1;
+      send_sns = 0;
     }
     else {
       // console.log("Handle direct");
@@ -52,7 +52,7 @@ exports.handler = function(event, context) {
     for (var i = 0; i < num_alerts; i++) {
 
       var alert = alerts[i];
-      console.log("Processing %o",alert);
+      // console.log("Processing %o",alert);
 
       if ( alert.polygonCoordinates ) {
         shape = {
@@ -112,6 +112,8 @@ exports.handler = function(event, context) {
           }
         };
   
+        console.log("Create request");
+
         var req = http.request(options, function(res) {
             var body = '';
             console.log('Status:', res.statusCode);
@@ -161,9 +163,10 @@ exports.handler = function(event, context) {
             });
         });
   
-        console.log("Sending http query");
+        console.log("Sending http query %s",postData);
         req.on('error', context.fail);
         req.write(postData);
+        console.log("req.end");
         req.end();
         console.log("Call completed");
       }
