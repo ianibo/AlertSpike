@@ -83,37 +83,49 @@ exports.handler = function(event, context) {
 
       var req = http.request(options, function(res) {
           var body = '';
-          console.log('Status:', res.statusCode);
-          console.log('Headers:', JSON.stringify(res.headers));
+          var lambda_response = 'OK';
+          // console.log('Status:', res.statusCode);
+          // console.log('Headers:', JSON.stringify(res.headers));
           res.setEncoding('utf8');
           res.on('data', function(chunk) {
               body += chunk;
           });
 
           res.on('end', function() {
-              console.log('Successfully processed HTTP response');
+              // console.log('Successfully processed HTTP response');
               // If we know it's JSON, parse it
-              if (res.headers['content-type'] === 'application/json') {
+              if (res.headers['content-type'].lastIndexOf('application/json',0) === 0 ) {
                 body = JSON.parse(body);
+                var sns = send_sns ? new aws.SNS() : null;
+                var num_profiles = body.hits.hits.length;
 
-                if ( send_sns ) {
-                  // Send sns for each matching sub
-                  var sns = new aws.SNS();
-                  var pubResult = sns.publish({
-                      Message: 'Test publish to SNS from Lambda',
-                      TopicArn: 'arn:aws:sns:us-east-1:381798314226:alert-hub-area-match'
-                  }, function(err, data) {
-                      if (err) {
-                          console.log(err.stack);
-                          return;
-                      }
-                      console.log('push sent');
-                      console.log(data);
-                  });
+                // console.log("Processing %d profiles",num_profiles);
+                for (var i = 0; i < num_profiles; i++) {
+                  var profile_entry = body.hits.hits[i]
+                  console.log("Processing hit %d %s %s %s %s",i,profile_entry._source.name,profile_entry._source.recid,profile_entry._source.shortcode);
+                  // Shape is in profile_entry._source.subshape
+
+                  if ( send_sns ) {
+                    // Send sns for each matching sub
+                    var pubResult = sns.publish({
+                        Message: 'Test publish to SNS from Lambda',
+                        TopicArn: 'arn:aws:sns:us-east-1:381798314226:alert-hub-area-match'
+                    }, function(err, data) {
+                        if (err) {
+                            console.log(err.stack);
+                            return;
+                        }
+                        // console.log('push sent');
+                        // console.log(data);
+                    });
+                  }
                 }
               }
+              else {
+                console.log("Unable to process response type %s",res.headers['content-type']);
+              }
 
-              context.succeed(body);
+              context.succeed(lambda_response);
           });
       });
 
