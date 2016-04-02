@@ -45,7 +45,9 @@ exports.handler = function(event, context) {
 
       for (var i = 0; i < num_alerts; i++) {
         console.log("Pushing %o",event.Records[i].Sns.Message);
-        alerts.push(JSON.parse(event.Records[i].Sns.Message));
+        parseString(event.Records[i].Sns.Message, function(err, result) {
+          alerts.push(result)
+        }
       }
       send_sns = 0;
     }
