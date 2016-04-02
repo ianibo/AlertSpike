@@ -3,6 +3,22 @@ var querystring = require('querystring');
 
 /**
  * See https://nodejs.org/api/http.html#http_http_request_options_callback
+ *
+ * This handler accepts an event containing a GeoJson shape definition. Normally [tho not constrained so] this will
+ * be a polygon or a circle. The handler will return a list of all subscriptions intersecting that alert profile.
+ * Example events include
+ *
+ *  shape : {
+ *    "type": "polygon",
+ *    "coordinates" : [ [ [-109.5297,40.4554], [-109.5298,40.4556], [-109.5299,40.4556], [-109.5299,40.4554], [-109.5297,40.4554] ] ]
+ *  }
+ *
+ *  shape : {
+ *    "type": "circle",
+ *    "coordinates" : [-109.5288,40.4555],
+ *    "radius" : "1000m"
+ *  }
+ *
  */
 exports.handler = function(event, context) {
 
