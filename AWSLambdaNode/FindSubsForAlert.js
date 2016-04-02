@@ -1,4 +1,5 @@
 var http = require('http');
+var querystring = require('querystring');
 
 /**
  * See https://nodejs.org/api/http.html#http_http_request_options_callback
@@ -18,10 +19,7 @@ exports.handler = function(event, context) {
                          "filter": {
                              "geo_shape": {
                                "subshape": {
-                                 "shape": {
-                                   "type": "polygon",
-                                   "coordinates" : shapeCoordinates
-                                 },
+                                 "shape": event.shape,
                                  relation:'intersects'
                                }
                              }
