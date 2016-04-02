@@ -122,6 +122,8 @@ exports.handler = function(event, context) {
             });
   
             res.on('end', function() {
+                console.log("Processing search response");
+
                 // console.log('Successfully processed HTTP response');
                 // If we know it's JSON, parse it
                 if (res.headers['content-type'].lastIndexOf('application/json',0) === 0 ) {
@@ -135,6 +137,7 @@ exports.handler = function(event, context) {
                     // Shape is in profile_entry._source.subshape
   
                     if ( send_sns ) {
+                      console.log("Publish profile alert message");
                       // Send sns for each matching sub
                       var pubResult = sns.publish({
                           Message: 'CAP Alert Profile Notification '+profile_entry._source.recid,
@@ -158,6 +161,7 @@ exports.handler = function(event, context) {
             });
         });
   
+        console.log("call");
         req.on('error', context.fail);
         req.write(postData);
         req.end();
@@ -167,5 +171,8 @@ exports.handler = function(event, context) {
         console.log("No shape to search against");
       }
     }
+
+    console.log("Complete");
+
     context.succeed(lambda_response);
 };
