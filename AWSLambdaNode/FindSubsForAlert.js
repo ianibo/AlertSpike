@@ -24,11 +24,10 @@ exports.handler = function(event, context) {
     console.log("Event %o",event);
 
     var shape = null;
-    var send_sns = 1;
+    var send_sns = 0;
     var alerts = [];
     var num_alerts = 1;
     var lambda_response = 'OK';
-    var sns = send_sns ? new aws.SNS() : null;
 
     if ( event.Records ) {
       num_alerts = event.Records.length;
@@ -36,11 +35,14 @@ exports.handler = function(event, context) {
       for (var i = 0; i < num_alerts; i++) {
         alerts.push(event.Records[i].Sns);
       }
+      send_sns = 1;
     }
     else {
       // Direct event from http interface or test
       alerts.push(event);
     }
+
+    var sns = send_sns ? new aws.SNS() : null;
 
     for (var i = 0; i < num_alerts; i++) {
 
