@@ -30,21 +30,22 @@ exports.handler = function(event, context) {
     var lambda_response = 'OK';
 
     if ( event.Records ) {
-      console.log("Handle sns");
+      // console.log("Handle sns");
       num_alerts = event.Records.length;
 
       for (var i = 0; i < num_alerts; i++) {
-        alerts.push(event.Records[i].Sns.Message);
+        // console.log("Pushing %o",event.Records[i].Sns.Message);
+        alerts.push(JSON.parse(event.Records[i].Sns.Message));
       }
       send_sns = 1;
     }
     else {
-      console.log("Handle direct");
+      // console.log("Handle direct");
       // Direct event from http interface or test
       alerts.push(event);
     }
 
-    console.log("alerts: %o",alerts);
+    // console.log("alerts: %o",alerts);
 
     var sns = send_sns ? new aws.SNS() : null;
 
@@ -62,7 +63,7 @@ exports.handler = function(event, context) {
       else if ( alert.circleCenterRadius ) {
          shape = { 
           "type": "circle",
-          "coordinates" : [alert.circleCenterRadius[0],event.circleCenterRadius[1]],
+          "coordinates" : [alert.circleCenterRadius[0],alert.circleCenterRadius[1]],
           "radius" : ""+alert.circleCenterRadius[2]+"m"
         }
       }
