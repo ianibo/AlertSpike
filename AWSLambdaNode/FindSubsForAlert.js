@@ -1,5 +1,7 @@
 var http = require('http');
 var querystring = require('querystring');
+var aws = require('aws-sdk');
+var s3 = new aws.S3({ apiVersion: '2006-03-01' });
 
 /**
  * See https://nodejs.org/api/http.html#http_http_request_options_callback
@@ -19,6 +21,7 @@ var querystring = require('querystring');
 exports.handler = function(event, context) {
 
     var shape = null;
+    var send_sns = 0;
 
     if ( event.polygonCoordinates ) {
       shape = {
@@ -91,8 +94,25 @@ exports.handler = function(event, context) {
               console.log('Successfully processed HTTP response');
               // If we know it's JSON, parse it
               if (res.headers['content-type'] === 'application/json') {
-                  body = JSON.parse(body);
+                body = JSON.parse(body);
+
+                if ( send_sns ) {
+                  // Send sns for each matching sub
+                  var sns = new aws.SNS();
+                  var pubResult = sns.publish({
+                      Message: 'Test publish to SNS from Lambda',
+                      TopicArn: 'arn:aws:sns:us-east-1:381798314226:alert-hub-area-match'
+                  }, function(err, data) {
+                      if (err) {
+                          console.log(err.stack);
+                          return;
+                      }
+                      console.log('push sent');
+                      console.log(data);
+                  });
+                }
               }
+
               context.succeed(body);
           });
       });
