@@ -21,7 +21,7 @@ var s3 = new aws.S3({ apiVersion: '2006-03-01' });
  */
 exports.handler = function(event, context) {
 
-    // console.log("Event %o",event);
+    console.log("Event %o",event);
 
     var shape = null;
     var send_sns = 0;
@@ -35,7 +35,7 @@ exports.handler = function(event, context) {
       num_alerts = event.Records.length;
 
       for (var i = 0; i < num_alerts; i++) {
-        // console.log("Pushing %o",event.Records[i].Sns.Message);
+        console.log("Pushing %o",event.Records[i].Sns.Message);
         alerts.push(JSON.parse(event.Records[i].Sns.Message));
       }
       send_sns = 0;
