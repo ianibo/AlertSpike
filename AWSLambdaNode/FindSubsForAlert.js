@@ -114,8 +114,8 @@ exports.handler = function(event, context) {
   
         var req = http.request(options, function(res) {
             var body = '';
-            // console.log('Status:', res.statusCode);
-            // console.log('Headers:', JSON.stringify(res.headers));
+            console.log('Status:', res.statusCode);
+            console.log('Headers:', JSON.stringify(res.headers));
             res.setEncoding('utf8');
             res.on('data', function(chunk) {
                 body += chunk;
@@ -161,10 +161,11 @@ exports.handler = function(event, context) {
             });
         });
   
-        console.log("call");
+        console.log("Sending http query");
         req.on('error', context.fail);
         req.write(postData);
         req.end();
+        console.log("Call completed");
       }
       else {
         // No shape to search against
