@@ -34,14 +34,14 @@ exports.handler = function(event, context) {
       num_alerts = event.Records.length;
 
       for (var i = 0; i < num_alerts; i++) {
-        alerts.push(event.Records[i].Sns);
+        alerts.push(event.Records[i].Sns.Message);
       }
       send_sns = 1;
     }
     else {
       console.log("Handle direct");
       // Direct event from http interface or test
-      alerts.push(event.Message);
+      alerts.push(event);
     }
 
     console.log("alerts: %o",alerts);
