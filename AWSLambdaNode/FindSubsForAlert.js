@@ -27,7 +27,7 @@ exports.handler = function(event, context) {
     var send_sns = 1;
     var alerts = [];
     var num_alerts = 1;
-
+    var lambda_response = 'OK';
     var sns = send_sns ? new aws.SNS() : null;
 
     if ( event.Records ) {
@@ -104,10 +104,8 @@ exports.handler = function(event, context) {
           }
         };
   
-  
         var req = http.request(options, function(res) {
             var body = '';
-            var lambda_response = 'OK';
             // console.log('Status:', res.statusCode);
             // console.log('Headers:', JSON.stringify(res.headers));
             res.setEncoding('utf8');
