@@ -1,3 +1,5 @@
+console.log('Loading CAP event notifications');
+
 var http = require('http');
 var querystring = require('querystring');
 var aws = require('aws-sdk');
