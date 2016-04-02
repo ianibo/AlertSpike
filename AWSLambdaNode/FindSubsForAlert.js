@@ -6,9 +6,7 @@ var querystring = require('querystring');
  */
 exports.handler = function(event, context) {
 
-    var shapeCoordinates = [[[]]];
-
-    var postData = querystring.stringify({
+    var postData = JSON.stringify({
                      "from":0,
                      "size":1000,
                      "query":{
@@ -32,9 +30,13 @@ exports.handler = function(event, context) {
 
     });
 
+    console.log("Send query %s",postData);
+
     var options = {
       hostname: 'ce.semweb.co',
       port: 80,
+      json: true,
+      body: postData,
       path: '/es/alertssubscriptions/_search',
       method: 'POST',
       headers: {
@@ -52,6 +54,7 @@ exports.handler = function(event, context) {
         res.on('data', function(chunk) {
             body += chunk;
         });
+
         res.on('end', function() {
             console.log('Successfully processed HTTPS response');
             // If we know it's JSON, parse it

@@ -1,5 +1,5 @@
 # See if we can find the above record by searching for a square that intersects it
-curl -XGET 'http://52.31.77.192/es/alerts/alert/_search' -d '
+curl -XGET 'http://ce.semweb.co/es/alerts/alert/_search' -d '
 {
     "query":{
         "bool": {
@@ -26,7 +26,7 @@ curl -XGET 'http://52.31.77.192/es/alerts/alert/_search' -d '
 
 
 # Lets see if we can find by intersecting circle
-curl -XGET 'http://52.31.77.192/es/alerts/alert/_search' -d '
+curl -XGET 'http://ce.semweb.co/es/alerts/alert/_search' -d '
 {
     "query":{
         "bool": {
