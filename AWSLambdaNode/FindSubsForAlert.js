@@ -21,7 +21,7 @@ var s3 = new aws.S3({ apiVersion: '2006-03-01' });
 exports.handler = function(event, context) {
 
     var shape = null;
-    var send_sns = 0;
+    var send_sns = 1;
 
     if ( event.polygonCoordinates ) {
       shape = {
@@ -108,8 +108,9 @@ exports.handler = function(event, context) {
                   if ( send_sns ) {
                     // Send sns for each matching sub
                     var pubResult = sns.publish({
-                        Message: 'Test publish to SNS from Lambda',
-                        TopicArn: 'arn:aws:sns:us-east-1:381798314226:alert-hub-area-match'
+                        Message: 'CAP Alert Profile Notification '+profile_entry._source.recid,
+                        TopicArn: 'arn:aws:sns:eu-west-1:603029492791:CAPProfileNotification'
+                        // TopicArn: 'arn:aws:sns:us-east-1:381798314226:alert-hub-area-match'
                     }, function(err, data) {
                         if (err) {
                             console.log(err.stack);
