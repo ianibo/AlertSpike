@@ -28,6 +28,7 @@ exports.handler = function(event, context) {
     var alerts = [];
     var num_alerts = 1;
     var lambda_response = 'OK';
+    var ctr = 0;
 
     if ( event.Records ) {
       // console.log("Handle sns");
@@ -52,7 +53,7 @@ exports.handler = function(event, context) {
     for (var i = 0; i < num_alerts; i++) {
 
       var alert = alerts[i];
-      // console.log("Processing %o",alert);
+      console.log("Processing %o",alert);
 
       if ( alert.polygonCoordinates ) {
         shape = {
@@ -97,7 +98,7 @@ exports.handler = function(event, context) {
   
         });
   
-        console.log("Send query %s",postData);
+        // console.log("Send query %s",postData);
   
         var options = {
           hostname: 'ce.semweb.co',
@@ -115,6 +116,7 @@ exports.handler = function(event, context) {
         console.log("Create request");
 
         var req = http.request(options, function(res) {
+
             var body = '';
             console.log('Status:', res.statusCode);
             console.log('Headers:', JSON.stringify(res.headers));
@@ -152,6 +154,7 @@ exports.handler = function(event, context) {
                           }
                           // console.log('push sent');
                           // console.log(data);
+
                       });
                     }
                   }
@@ -160,11 +163,23 @@ exports.handler = function(event, context) {
                   console.log("Unable to process response type %s",res.headers['content-type']);
                 }
   
+                // Don't call this until all requests have completed
+                ctr--;
+                console.log("ctr: %o",ctr);
+                if ( ctr == 0 ) {
+                  context.succeed(lambda_response);
+                }
             });
         });
   
         console.log("Sending http query %s",postData);
-        req.on('error', context.fail);
+
+        req.on('error', function(e) {
+          console.log("error %o",e);
+          context.fail();
+        });
+
+        ctr++;
         req.write(postData);
         console.log("req.end");
         req.end();
@@ -176,7 +191,7 @@ exports.handler = function(event, context) {
       }
     }
 
+
     console.log("Complete");
 
-    context.succeed(lambda_response);
 };
