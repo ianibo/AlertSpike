@@ -30,6 +30,7 @@ exports.handler = function(event, context) {
     var lambda_response = 'OK';
 
     if ( event.Records ) {
+      console.log("Handle sns");
       num_alerts = event.Records.length;
 
       for (var i = 0; i < num_alerts; i++) {
@@ -38,8 +39,9 @@ exports.handler = function(event, context) {
       send_sns = 1;
     }
     else {
+      console.log("Handle direct");
       // Direct event from http interface or test
-      alerts.push(event);
+      alerts.push(event.Message);
     }
 
     var sns = send_sns ? new aws.SNS() : null;
@@ -47,6 +49,7 @@ exports.handler = function(event, context) {
     for (var i = 0; i < num_alerts; i++) {
 
       var alert = alerts[i];
+      console.log("Processing %o",alert);
 
       if ( alert.polygonCoordinates ) {
         shape = {
@@ -62,7 +65,7 @@ exports.handler = function(event, context) {
         }
       }
       else {
-        console.log("Unable to handle event");
+        console.log("Unable to handle event %o",alert);
       }
   
       if ( shape ) {
