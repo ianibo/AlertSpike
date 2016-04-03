@@ -3,6 +3,7 @@ console.log('Loading CAP event notifications');
 var http = require('http');
 var aws = require('aws-sdk');
 var s3 = new aws.S3({ apiVersion: '2006-03-01' });
+var parseString = require('xml2js').parseString;
 
 /**
  * See https://nodejs.org/api/http.html#http_http_request_options_callback
@@ -31,19 +32,25 @@ exports.handler = function(event, context) {
     var ctr = 0;
 
     if ( event.Records ) {
-      // console.log("Handle sns");
+      console.log("Handle sns");
       num_alerts = event.Records.length;
 
       for (var i = 0; i < num_alerts; i++) {
         console.log("Pushing %o",event.Records[i].Sns.Message);
-        alerts.push(JSON.parse(event.Records[i].Sns.Message));
+        var json_payload = JSON.parse(event.Records[i].Sns.Message);
+        console.log("Parsed json payload %o",json_payload);
+        parseString(json_payload.alert.capXML, function(err, result) {
+          alerts.push(result);
+        }
       }
       send_sns = 0;
     }
     else {
-      // console.log("Handle direct");
+      console.log("Handle direct");
       // Direct event from http interface or test
-      alerts.push(event);
+      parseString(event.alert.capXML, function(err, result) {
+        alerts.push(result);
+      }
     }
 
     // console.log("alerts: %o",alerts);
@@ -55,23 +62,6 @@ exports.handler = function(event, context) {
       var alert = alerts[i];
       console.log("Processing %o",alert);
 
-      if ( alert.polygonCoordinates ) {
-        shape = {
-          "type": "polygon",
-          "coordinates" : [ alert.polygonCoordinates ]
-        }
-      }
-      else if ( alert.circleCenterRadius ) {
-         shape = { 
-          "type": "circle",
-          "coordinates" : [alert.circleCenterRadius[0],alert.circleCenterRadius[1]],
-          "radius" : ""+alert.circleCenterRadius[2]+"m"
-        }
-      }
-      else {
-        console.log("Unable to handle event %o",alert);
-      }
-  
       if ( shape ) {
   
         var postData = JSON.stringify({
