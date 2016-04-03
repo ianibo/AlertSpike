@@ -25,7 +25,7 @@ console.log("OK GO");
  */
 exports.handler = function(event, context) {
 
-    console.log("Event %o",event);
+    // console.log("Event %o",event);
 
     var shape = null;
     var send_sns = 0;
@@ -34,19 +34,14 @@ exports.handler = function(event, context) {
     var lambda_response = 'OK';
     var ctr = 0;
 
-    // parseString(xml, function (err, result) {
-    //     console.dir(JSON.stringify(result));
-    // });
-
-
     if ( event.Records ) {
-      console.log("Handle sns");
+      // console.log("Handle sns");
       num_alerts = event.Records.length;
 
       for (var i = 0; i < num_alerts; i++) {
-        console.log("Pushing %o",event.Records[i].Sns.Message);
+        // console.log("Pushing %o",event.Records[i].Sns.Message);
         var json_payload = JSON.parse(event.Records[i].Sns.Message);
-        console.log("Parsed json payload %o",json_payload);
+        // console.log("Parsed json payload %o",json_payload);
         parseString(json_payload.alert.capXML, function(err, result) {
           alerts.push(result);
         });
@@ -54,7 +49,7 @@ exports.handler = function(event, context) {
       send_sns = 0;
     }
     else {
-      console.log("Handle direct");
+      // console.log("Handle direct");
       // Direct event from http interface or test
       parseString(event.alert.capXML, function(err, result) {
         alerts.push(result);
@@ -67,6 +62,29 @@ exports.handler = function(event, context) {
 
       var alert = alerts[i];
       console.log("Processing %o",alert);
+
+      var info_elements = alert['cap:alert']['cap:info'];
+      // console.log("Processing info %o",info_elements);
+
+      for ( var j=0; j<info_elements.length; j++ ) {
+        // console.log("Process info element %o",info_elements[j]);
+
+        var cap_area_elements = info_elements[j]['cap:area'];
+        for ( var k=0; k<info_elements.length; k++ ) {
+          console.log("Process cap area %o %o",cap_area_elements[k]['cap:areaDesc'],cap_area_elements[k]['cap:polygon']);
+          if ( cap_area_elements[k]['cap:polygon'] ) {
+            shape = {
+              "type": "polygon",
+              "coordinates" : [ [ cap_area_elements[k]['cap:polygon'] ] ]
+            }
+            console.log("Setting up polygon shape : %o",shape);
+          }
+          else {
+            console.log("No polygon found");
+          }
+        }
+
+      }
 
       if ( shape ) {
   
