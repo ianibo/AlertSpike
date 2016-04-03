@@ -46,7 +46,7 @@ exports.handler = function(event, context) {
         console.log("Parsed json payload %o",json_payload);
         parseString(json_payload.alert.capXML, function(err, result) {
           alerts.push(result);
-        }
+        });
       }
       send_sns = 0;
     }
@@ -55,7 +55,7 @@ exports.handler = function(event, context) {
       // Direct event from http interface or test
       parseString(event.alert.capXML, function(err, result) {
         alerts.push(result);
-      }
+      });
     }
 
     var sns = send_sns ? new aws.SNS() : null;
