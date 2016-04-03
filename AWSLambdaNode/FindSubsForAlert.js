@@ -2,9 +2,12 @@ console.log('Loading CAP event notifications');
 
 var http = require('http');
 var aws = require('aws-sdk');
-var s3 = new aws.S3({ apiVersion: '2006-03-01' });
+// var s3 = new aws.S3({ apiVersion: '2006-03-01' });
+
+console.log("Get xml2js");
 var parseString = require('xml2js').parseString;
 
+console.log("OK GO");
 /**
  * See https://nodejs.org/api/http.html#http_http_request_options_callback
  *
