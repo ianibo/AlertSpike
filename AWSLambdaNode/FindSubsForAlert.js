@@ -73,9 +73,20 @@ exports.handler = function(event, context) {
         for ( var k=0; k<info_elements.length; k++ ) {
           console.log("Process cap area %o %o",cap_area_elements[k]['cap:areaDesc'],cap_area_elements[k]['cap:polygon']);
           if ( cap_area_elements[k]['cap:polygon'] ) {
+
+            var polygon_str = cap_area_elements[k]['cap:polygon'][0];
+            var polygon_arr = []
+
+            // Parse cap:polygon into array of points consisting of lng lat comma separated
+            var points_arr = polygon_str.split(' ');
+            for ( var l = 0; l<points_arr.length; l++ ) {
+              var lonlat = points_arr[l].split(',');
+              polygon_arr.push([lonlat[0],lonlat[1]]);
+            }
+
             shape = {
               "type": "polygon",
-              "coordinates" : [ [ cap_area_elements[k]['cap:polygon'] ] ]
+              "coordinates" : [ polygon_arr ]
             }
             console.log("Setting up polygon shape : %o",shape);
           }
