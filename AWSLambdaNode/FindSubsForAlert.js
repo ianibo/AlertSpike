@@ -37,21 +37,30 @@ exports.handler = function(event, context) {
 
 
     if ( event.Records ) {
-      // console.log("Handle sns");
+      console.log("Handle sns");
       num_alerts = event.Records.length;
 
       for (var i = 0; i < num_alerts; i++) {
         console.log("Pushing %o",event.Records[i].Sns.Message);
+<<<<<<< HEAD
         parseString(event.Records[i].Sns.Message, function(err, result) {
           alerts.push(result)
+=======
+        var json_payload = JSON.parse(event.Records[i].Sns.Message);
+        console.log("Parsed json payload %o",json_payload);
+        parseString(json_payload.alert.capXML, function(err, result) {
+          alerts.push(result);
+>>>>>>> 36f9a26fa78dc482cc24ba6e5b4fe31d7413e081
         }
       }
       send_sns = 0;
     }
     else {
-      // console.log("Handle direct");
+      console.log("Handle direct");
       // Direct event from http interface or test
-      alerts.push(event);
+      parseString(event.alert.capXML, function(err, result) {
+        alerts.push(result);
+      }
     }
 
     var sns = send_sns ? new aws.SNS() : null;
@@ -61,8 +70,11 @@ exports.handler = function(event, context) {
       var alert = alerts[i];
       console.log("Processing %o",alert);
 
+<<<<<<< HEAD
       var shape = null;
   
+=======
+>>>>>>> 36f9a26fa78dc482cc24ba6e5b4fe31d7413e081
       if ( shape ) {
   
         var postData = JSON.stringify({
