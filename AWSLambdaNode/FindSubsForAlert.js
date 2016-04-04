@@ -46,7 +46,7 @@ exports.handler = function(event, context) {
           alerts.push(result);
         });
       }
-      send_sns = 0;
+      send_sns = 1;
     }
     else {
       // console.log("Handle direct");
@@ -56,7 +56,7 @@ exports.handler = function(event, context) {
       });
     }
 
-    var sns = send_sns ? new aws.SNS() : null;
+    var sns = send_sns ? new aws.SNS({region:'us-east-1'}) : null;
 
     for (var i = 0; i < num_alerts; i++) {
 
@@ -166,12 +166,17 @@ exports.handler = function(event, context) {
                     // Shape is in profile_entry._source.subshape
   
                     if ( send_sns ) {
+                      var response_json = {
+                        message:'CAP Alert Profile Notification '+profile_entry._source.recid
+                      };
+                      var response_payload = JSON.stringify(response_json);
                       console.log("Publish profile alert message");
+
                       // Send sns for each matching sub
                       var pubResult = sns.publish({
-                          Message: 'CAP Alert Profile Notification '+profile_entry._source.recid,
-                          TopicArn: 'arn:aws:sns:eu-west-1:603029492791:CAPProfileNotification'
-                          // TopicArn: 'arn:aws:sns:us-east-1:381798314226:alert-hub-area-match'
+                          Message: response_payload,
+                          // TopicArn: 'arn:aws:sns:eu-west-1:603029492791:CAPProfileNotification'
+                          TopicArn: 'arn:aws:sns:us-east-1:381798314226:alert-hub-area-match'
                       }, function(err, data) {
                           if (err) {
                               console.log(err.stack);
@@ -197,7 +202,7 @@ exports.handler = function(event, context) {
             });
         });
   
-        console.log("Sending http query %s",postData);
+        // console.log("Sending http query %s",postData);
 
         req.on('error', function(e) {
           console.log("error %o",e);
@@ -206,9 +211,9 @@ exports.handler = function(event, context) {
 
         ctr++;
         req.write(postData);
-        console.log("req.end");
+        // console.log("req.end");
         req.end();
-        console.log("Call completed");
+        // console.log("Call completed");
       }
       else {
         // No shape to search against
