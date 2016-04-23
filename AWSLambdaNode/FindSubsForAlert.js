@@ -35,16 +35,22 @@ exports.handler = function(event, context) {
     var ctr = 0;
 
     if ( event.Records ) {
-      // console.log("Handle sns");
+      console.log("Handle sns");
       num_alerts = event.Records.length;
 
       for (var i = 0; i < num_alerts; i++) {
         // console.log("Pushing %o",event.Records[i].Sns.Message);
         var json_payload = JSON.parse(event.Records[i].Sns.Message);
-        // console.log("Parsed json payload %o",json_payload);
-        parseString(json_payload.alert.capXML, function(err, result) {
-          alerts.push(result);
-        });
+        console.log("Parsed json payload %o",json_payload);
+
+        try {
+          parseString(json_payload.alert.capXML, function(err, result) {
+            alerts.push(result);
+          });
+        }
+        catch(err) {
+          console.log("Problem parsing capXML %o",err);
+        }
       }
       send_sns = 1;
     }
