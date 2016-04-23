@@ -57,7 +57,7 @@ exports.handler = function(event, context) {
             }
 
             if ( result ) {
-              alerts.push(result);
+              alerts.push({orig:json_payload.alert,json:result});
             } 
 
           });
@@ -80,7 +80,8 @@ exports.handler = function(event, context) {
 
     for (var i = 0; i < alerts.length; i++) {
 
-      var alert = alerts[i];
+      var source_alert = alerts[i].orig;
+      var alert = alerts[i].json;
       console.log("Processing -> (XML AS JSON) %o",alert);
 
       var info_elements = alert['cap:alert']['cap:info'];
@@ -91,7 +92,7 @@ exports.handler = function(event, context) {
 
         var cap_area_elements = info_elements[j]['cap:area'];
         for ( var k=0; k<info_elements.length; k++ ) {
-          console.log("Process cap area %o %o",cap_area_elements[k]['cap:areaDesc'],cap_area_elements[k]['cap:polygon']);
+          // console.log("Process cap area %o %o",cap_area_elements[k]['cap:areaDesc'],cap_area_elements[k]['cap:polygon']);
           if ( cap_area_elements[k]['cap:polygon'] ) {
 
             var polygon_str = cap_area_elements[k]['cap:polygon'][0];
@@ -108,7 +109,7 @@ exports.handler = function(event, context) {
               "type": "polygon",
               "coordinates" : [ polygon_arr ]
             }
-            console.log("Setting up polygon shape : %o",shape);
+            // console.log("Setting up polygon shape : %o",shape);
           }
           else {
             console.log("No polygon found");
@@ -187,10 +188,20 @@ exports.handler = function(event, context) {
   
                     if ( send_sns ) {
                       ctr++;
-                      var response_json = {
-                        default:"CAP Alert Profile Notification "+profile_entry._source.recid,
-                        message:"CAP Alert Profile Notification "+profile_entry._source.recid
+ 
+                      var response_main = {
+                        alert:source_alert,
+                        subscription:{
+                          name:profile_entry._source.name,
+                          subid:profile_entry._source.recid,
+                          shortcode:profile_entry._source.shortcode
+                        },
                       };
+
+                      var response_json = {
+                        default: JSON.stringify(response_main)
+                      };
+
                       var response_payload = JSON.stringify(response_json);
 
                       try {
@@ -200,8 +211,6 @@ exports.handler = function(event, context) {
                         // Send sns for each matching sub
                         var pubResult = sns.publish({
                             Message: response_payload,
-                            // TopicArn: 'arn:aws:sns:eu-west-1:603029492791:CAPProfileNotification'
-                            // TopicArn: 'arn:aws:sns:us-east-1:381798314226:alert-hub-area-match',
                             TopicArn: 'arn:aws:sns:eu-west-1:381798314226:alert-hub-area-match',
                             MessageStructure: 'json'
                         }, function(err, data) {
