@@ -35,18 +35,30 @@ class AdminController {
     def content = request.getFile("content")
     def charset='UTF-8'
 
-    def csv = new CSVReader(new InputStreamReader(content.inputStream,java.nio.charset.Charset.forName(charset)),',' as char,'"' as char)
+    def csv = new CSVReader(new InputStreamReader(content.inputStream,java.nio.charset.Charset.forName(charset)),'\t' as char,'"' as char)
     String[] header = csv.readNext()
     log.debug("Process header ${header}");
     String[] nl=csv.readNext()
     int rownum = 0;
     while(nl!=null) {
       log.debug("Process profile line ${nl}");
-      def p = AlertProfile.findByShortcode(nl[1]) 
+      def p = AlertProfile.findByShortcode(nl[0]) 
       if ( p == null ) { 
         log.debug("Create new profile ${nl[0]}");
-        def r = ( nl.length == 5 ) ? nl[4] : null
-        p= new AlertProfile(name:nl[0], shortcode:nl[1],shapeType:nl[2], shapeCoordinates:nl[3], radius:r).save(flush:true, failOnError:true);
+        def r = ( nl.length > 12 ) ? nl[12] : null
+        p= new AlertProfile(
+                            name:nl[2], 
+                            shortcode:nl[0],
+                            shapeType:nl[10], 
+                            shapeCoordinates:nl[11], 
+                            radius:r,
+                            subscriptionUrl:nl[3],
+                            languageOnly:nl[4],
+                            highPriorityOnly:nl[5],
+                            officialOnly:nl[6],
+                            xPathFilterId:nl[7],
+                            xPathFilter:nl[8],
+                            areaFilterId:nl[9]).save(flush:true, failOnError:true);
       }
       nl=csv.readNext()
     }

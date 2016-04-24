@@ -188,13 +188,35 @@ exports.handler = function(event, context) {
   
                     if ( send_sns ) {
                       ctr++;
- 
+
+                      var areaFilter = {};
+
+
+                      if ( profile_entry._source.subshape.type === 'polygon' ) {
+                        // Polygon
+                        areaFilter.polygonCoordinates=profile_entry._source.subshape.coordinates;
+                        areaFilter.circleCenterRadius="none";
+                      }
+                      else {
+                        // circle centre radius
+                        areaFilter.polygonCoordinates="none";
+                        areaFilter.circleCenterRadius=profile_entry._source.subshape.coordinates;
+                      }
+
                       var response_main = {
                         alert:source_alert,
                         subscription:{
-                          name:profile_entry._source.name,
-                          subid:profile_entry._source.recid,
-                          shortcode:profile_entry._source.shortcode
+                          subscriptionId:profile_entry._source.recid,
+                          subscriptionName:profile_entry._source.name,
+                          subscriptionUrl:profile_entry._source.subscriptionUrl,
+                          languageOnly:profile_entry._source.languageOnly,
+                          highPriorityOnly:profile_entry._source.highPriorityOnly,
+                          officialOnly:profile_entry._source.officialOnly,
+                          xPathFilterId:profile_entry._source.xPathFilterId,
+                          xPathFilter:profile_entry._source.xPathFilter,
+                          areaFilterId:profile_entry._source.areaFilterId,
+                          shortcode:profile_entry._source.shortcode,
+                          areaFilter:areaFilter
                         },
                       };
 
