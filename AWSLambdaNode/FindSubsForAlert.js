@@ -4,8 +4,6 @@ var http = require('http');
 var aws = require('aws-sdk');
 // var s3 = new aws.S3({ apiVersion: '2006-03-01' });
 
-console.log("Get xml2js");
-var parseString = require('xml2js').parseString;
 
 console.log("OK GO");
 /**
@@ -25,7 +23,15 @@ console.log("OK GO");
  */
 exports.handler = function(event, context) {
 
-    console.log("Event %o",event);
+    // console.log("Event %o",event);
+    console.log("Get xml2js 2");
+    var parseString = null;
+    try {
+      parseString = require('xml2js').parseString;
+    }
+    catch ( err ) {
+      console.log("Problem loading xml2js parse string %o",err);
+    }
 
     var shape = null;
     var send_sns = 0;
@@ -34,24 +40,33 @@ exports.handler = function(event, context) {
     var lambda_response = 'OK';
     var ctr = 0;
 
-    // parseString(xml, function (err, result) {
-    //     console.dir(JSON.stringify(result));
-    // });
-
-
     if ( event.Records ) {
       console.log("Handle sns");
       num_alerts = event.Records.length;
 
       for (var i = 0; i < num_alerts; i++) {
-        console.log("Pushing %o",event.Records[i].Sns.Message);
+        // console.log("Pushing %o",event.Records[i].Sns.Message);
         var json_payload = JSON.parse(event.Records[i].Sns.Message);
-        console.log("Parsed json payload %o",json_payload);
-        parseString(json_payload.alert.capXML, function(err, result) {
-          alerts.push(result);
-        });
+        console.log("Parsed json payload");
+
+        // try {
+          parseString(json_payload.alert.capXml, function(err, result) {
+
+            if ( err ) {
+              console.log("Parsed XML payload err:%o",err);
+            }
+
+            if ( result ) {
+              alerts.push({orig:json_payload.alert,json:result});
+            } 
+
+          });
+        // }
+        // catch(err) {
+        //   console.log("Problem parsing capXML %o",err);
+        // }
       }
-      send_sns = 0;
+      send_sns = 1;
     }
     else {
       console.log("Handle direct");
@@ -61,12 +76,47 @@ exports.handler = function(event, context) {
       });
     }
 
-    var sns = send_sns ? new aws.SNS() : null;
+    var sns = send_sns ? new aws.SNS({region:'eu-west-1'}) : null;
 
-    for (var i = 0; i < num_alerts; i++) {
+    for (var i = 0; i < alerts.length; i++) {
 
-      var alert = alerts[i];
-      console.log("Processing %o",alert);
+      var source_alert = alerts[i].orig;
+      var alert = alerts[i].json;
+      console.log("Processing -> (XML AS JSON) %o",alert);
+
+      var info_elements = alert['cap:alert']['cap:info'];
+      // console.log("Processing info %o",info_elements);
+
+      for ( var j=0; j<info_elements.length; j++ ) {
+        // console.log("Process info element %o",info_elements[j]);
+
+        var cap_area_elements = info_elements[j]['cap:area'];
+        for ( var k=0; k<info_elements.length; k++ ) {
+          // console.log("Process cap area %o %o",cap_area_elements[k]['cap:areaDesc'],cap_area_elements[k]['cap:polygon']);
+          if ( cap_area_elements[k]['cap:polygon'] ) {
+
+            var polygon_str = cap_area_elements[k]['cap:polygon'][0];
+            var polygon_arr = []
+
+            // Parse cap:polygon into array of points consisting of lng lat comma separated
+            var points_arr = polygon_str.split(' ');
+            for ( var l = 0; l<points_arr.length; l++ ) {
+              var lonlat = points_arr[l].split(',');
+              polygon_arr.push([lonlat[0],lonlat[1]]);
+            }
+
+            shape = {
+              "type": "polygon",
+              "coordinates" : [ polygon_arr ]
+            }
+            // console.log("Setting up polygon shape : %o",shape);
+          }
+          else {
+            console.log("No polygon found");
+          }
+        }
+
+      }
 
       if ( shape ) {
   
@@ -137,56 +187,117 @@ exports.handler = function(event, context) {
                     // Shape is in profile_entry._source.subshape
   
                     if ( send_sns ) {
-                      console.log("Publish profile alert message");
-                      // Send sns for each matching sub
-                      var pubResult = sns.publish({
-                          Message: 'CAP Alert Profile Notification '+profile_entry._source.recid,
-                          TopicArn: 'arn:aws:sns:eu-west-1:603029492791:CAPProfileNotification'
-                          // TopicArn: 'arn:aws:sns:us-east-1:381798314226:alert-hub-area-match'
-                      }, function(err, data) {
-                          if (err) {
-                              console.log(err.stack);
-                              return;
-                          }
-                          // console.log('push sent');
-                          // console.log(data);
+                      ctr++;
 
-                      });
+                      var areaFilter = {};
+
+
+                      if ( profile_entry._source.subshape.type === 'polygon' ) {
+                        // Polygon
+                        areaFilter.polygonCoordinates=profile_entry._source.subshape.coordinates;
+                        areaFilter.circleCenterRadius="none";
+                      }
+                      else {
+                        // circle centre radius
+                        areaFilter.polygonCoordinates="none";
+                        areaFilter.circleCenterRadius=profile_entry._source.subshape.coordinates;
+                      }
+
+                      var response_main = {
+                        alert:source_alert,
+                        subscription:{
+                          subscriptionId:profile_entry._source.recid,
+                          subscriptionName:profile_entry._source.name,
+                          subscriptionUrl:profile_entry._source.subscriptionUrl,
+                          languageOnly:profile_entry._source.languageOnly,
+                          highPriorityOnly:profile_entry._source.highPriorityOnly,
+                          officialOnly:profile_entry._source.officialOnly,
+                          xPathFilterId:profile_entry._source.xPathFilterId,
+                          xPathFilter:profile_entry._source.xPathFilter,
+                          areaFilterId:profile_entry._source.areaFilterId,
+                          shortcode:profile_entry._source.shortcode,
+                          areaFilter:areaFilter
+                        },
+                      };
+
+                      var response_json = {
+                        default: JSON.stringify(response_main)
+                      };
+
+                      var response_payload = JSON.stringify(response_json);
+
+                      try {
+                        console.log("Publish profile alert message ", response_payload);
+
+
+                        // Send sns for each matching sub
+                        var pubResult = sns.publish({
+                            Message: response_payload,
+                            TopicArn: 'arn:aws:sns:eu-west-1:381798314226:alert-hub-area-match',
+                            MessageStructure: 'json'
+                        }, function(err, data) {
+
+                            console.log("In sns.publish callback");
+
+                            if (err) {
+                              console.log("Problem ",err);
+                              ctr--;
+                              if ( ctr == 0 ) {
+                                console.log("context.done");
+                                context.done(null,"success");
+                              }
+                              else {
+                                console.log("context not done ",ctr);
+                              }
+                            }
+                            else {
+                              console.log('Message sent ',data);
+                              ctr--;
+                              if ( ctr == 0 ) {
+                                console.log("context.done");
+                                context.done(null,"success");
+                              }
+                              else {
+                                console.log("context not done ",ctr);
+                              }
+                            }
+                        });
+
+                        console.log("sns.publish completed cleanly");
+
+                      }
+                      catch(err) {
+                        console.log("problem %o",err);
+                      }
+                      finally {
+                        console.log("SNS Send complete ctr=",ctr);
+                      }
                     }
                   }
                 }
                 else {
                   console.log("Unable to process response type %s",res.headers['content-type']);
                 }
-  
-                // Don't call this until all requests have completed
-                ctr--;
-                console.log("ctr: %o",ctr);
-                if ( ctr == 0 ) {
-                  context.succeed(lambda_response);
-                }
             });
         });
   
-        console.log("Sending http query %s",postData);
+        // console.log("Sending http query %s",postData);
 
         req.on('error', function(e) {
           console.log("error %o",e);
           context.fail();
         });
 
-        ctr++;
         req.write(postData);
-        console.log("req.end");
+        // console.log("req.end");
         req.end();
-        console.log("Call completed");
+        // console.log("Call completed");
       }
       else {
         // No shape to search against
         console.log("No shape to search against");
       }
     }
-
 
     console.log("Complete");
 

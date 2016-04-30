@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cap:alert xmlns:cap="urn:oasis:names:tc:emergency:cap:1.1">
+  <cap:identifier>urn:oid:2.49.0.3.1.127.2016.4.18.01.02.03.021</cap:identifier>
+  <cap:sender>Eliot.Christian@redcross.org</cap:sender>
+  <cap:sent>2016-04-18T01:02:03.004</cap:sent>
+  <cap:status>Actual</cap:status>
+  <cap:msgType>Alert</cap:msgType>
+  <cap:scope>Public</cap:scope>
+  <cap:info>
+    <cap:language>en</cap:language>
+    <cap:category>Geo</cap:category>
+    <cap:event>flood</cap:event>
+    <cap:responseType>Shelter</cap:responseType>
+    <cap:urgency>Immediate</cap:urgency>
+    <cap:severity>Extreme</cap:severity>
+    <cap:certainty>Observed</cap:certainty>
+    <cap:expires>2016-03-11T08:00:00-00:00</cap:expires>
+    <cap:senderName>British Red Cross</cap:senderName>
+    <cap:headline>Flood warning for low-lying areas of Sheffield, U.K. </cap:headline>
+    <cap:description>Flood warning for low-lying areas of Sheffield, U.K.</cap:description>
+    <cap:instruction>Residents in low-lying areas should exercise caution. Avoid low areas. Persons should not be out on the roads during heavy rainfall. If you must be outside, use extreme caution. Do not drive your vehicle into areas where water covers the roadway. Vehicles caught in rising waters should be abandoned quickly. Continue listening to local media as updates will be provided if conditions change significantly.</cap:instruction>
+    <cap:area>
+      <cap:areaDesc>Sheffield, U.K</cap:areaDesc>
+      <cap:polygon>53.44,-1.61 53.36,-1.65 53.3,-1.37 53.41,-1.32 53.44,-1.61</cap:polygon>
+      <cap:circle/>
+    </cap:area>
+  </cap:info>
+</cap:alert>

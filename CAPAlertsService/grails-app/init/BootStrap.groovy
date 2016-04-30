@@ -66,15 +66,28 @@ class BootStrap {
 
       String[] header = csv.readNext()
       String[] nl=csv.readNext()
+
+
+
       while(nl!=null) {
-        log.debug(" -> ${nl.length} ${nl[0]} ${nl[2]} ${nl[10]} ${nl[11]}");
-        def radius = nl.length > 12 ? nl[12] : null
-        // Add extra [] to make it into an array of shapes
-        try {
-          assertProfile(nl[2], nl[0], nl[10], "[ ${nl[11]} ]", radius)
-        }
-        catch ( Exception e ) {
-          e.printStackTrace();
+        log.debug("Process profile line ${nl}");
+        def p = AlertProfile.findByShortcode(nl[0])
+        if ( p == null ) { 
+          log.debug("Create new profile ${nl[0]}");
+          def r = ( nl.length > 12 ) ? nl[12] : null
+          p= new AlertProfile(
+                              name:nl[2], 
+                              shortcode:nl[0],
+                              shapeType:nl[10], 
+                              shapeCoordinates:nl[11],
+                              radius:r,
+                              subscriptionUrl:nl[3],
+                              languageOnly:nl[4],
+                              highPriorityOnly:nl[5],
+                              officialOnly:nl[6],
+                              xPathFilterId:nl[7],
+                              xPathFilter:nl[8],
+                              areaFilterId:nl[9]).save(flush:true, failOnError:true);
         }
         nl=csv.readNext()
       }

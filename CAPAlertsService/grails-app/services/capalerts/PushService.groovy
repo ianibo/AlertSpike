@@ -37,6 +37,14 @@ class PushService {
           coordinates:js.parseText(alert_profile.shapeCoordinates)
       ]
 
+      result.subscriptionUrl=alert_profile.subscriptionUrl
+      result.languageOnly=alert_profile.languageOnly
+      result.highPriorityOnly=alert_profile.highPriorityOnly
+      result.officialOnly=alert_profile.officialOnly
+      result.xPathFilterId=alert_profile.xPathFilterId
+      result.xPathFilter=alert_profile.xPathFilter
+      result.areaFilterId=alert_profile.areaFilterId
+
       if ( alert_profile.shapeType == 'circle' ) {
         result.subshape.radius = alert_profile.radius
       }
