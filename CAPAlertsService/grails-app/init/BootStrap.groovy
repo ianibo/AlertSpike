@@ -79,7 +79,7 @@ class BootStrap {
                               name:nl[2], 
                               shortcode:nl[0],
                               shapeType:nl[10], 
-                              shapeCoordinates:nl[11],
+                              shapeCoordinates:'[ '+nl[11]+' ]',
                               radius:r,
                               subscriptionUrl:nl[3],
                               languageOnly:nl[4],

@@ -102,7 +102,8 @@ exports.handler = function(event, context) {
             var points_arr = polygon_str.split(' ');
             for ( var l = 0; l<points_arr.length; l++ ) {
               var lonlat = points_arr[l].split(',');
-              polygon_arr.push([lonlat[0],lonlat[1]]);
+              // Flip the lon/lat due to geohash oddness
+              polygon_arr.push([lonlat[1],lonlat[0]]);
             }
 
             shape = {
@@ -144,7 +145,7 @@ exports.handler = function(event, context) {
   
         });
   
-        // console.log("Send query %s",postData);
+        console.log("curl -X GET 'http://se.semweb.co/es/alertssubscriptions/_search' -d '",postData,"'");
   
         var options = {
           hostname: 'ce.semweb.co',
