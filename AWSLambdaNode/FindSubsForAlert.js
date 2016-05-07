@@ -102,6 +102,8 @@ exports.handler = function(event, context) {
             var polygon_str = cap_area_elements[k]['polygon'][0];
             var polygon_arr = []
 
+            console.log("Process polygon_str",polygon_str);
+
             // Parse polygon into array of points consisting of lng lat comma separated
             var points_arr = polygon_str.split(' ');
             for ( var l = 0; l<points_arr.length; l++ ) {
