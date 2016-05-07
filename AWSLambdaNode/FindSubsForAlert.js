@@ -26,8 +26,11 @@ exports.handler = function(event, context) {
     // console.log("Event %o",event);
     console.log("Get xml2js 2");
     var parseString = null;
+    var stripPrefix = null;
     try {
-      parseString = require('xml2js').parseString;
+      var xml2js = require('xml2js');
+      parseString = xml2js.parseString;
+      stripPrefix = xml2js.stripPrefix;
     }
     catch ( err ) {
       console.log("Problem loading xml2js parse string %o",err);
@@ -50,13 +53,14 @@ exports.handler = function(event, context) {
         console.log("Parsed json payload");
 
         // try {
-          parseString(json_payload.alert.capXml, function(err, result) {
+          parseString(json_payload.alert.capXml, {tagNameProcessors:stripPrefix}, function(err, result) {
 
             if ( err ) {
               console.log("Parsed XML payload err:%o",err);
             }
 
             if ( result ) {
+              console.log("Got alert : result",result);
               alerts.push({orig:json_payload.alert,json:result});
             } 
 
@@ -82,23 +86,23 @@ exports.handler = function(event, context) {
 
       var source_alert = alerts[i].orig;
       var alert = alerts[i].json;
-      console.log("Processing -> (XML AS JSON) %o",alert);
+      console.log("Processing -> (XML AS JSON) alert:",alert);
 
-      var info_elements = alert['cap:alert']['cap:info'];
+      var info_elements = alert['alert']['info'];
       // console.log("Processing info %o",info_elements);
 
       for ( var j=0; j<info_elements.length; j++ ) {
         // console.log("Process info element %o",info_elements[j]);
 
-        var cap_area_elements = info_elements[j]['cap:area'];
+        var cap_area_elements = info_elements[j]['area'];
         for ( var k=0; k<info_elements.length; k++ ) {
-          // console.log("Process cap area %o %o",cap_area_elements[k]['cap:areaDesc'],cap_area_elements[k]['cap:polygon']);
-          if ( cap_area_elements[k]['cap:polygon'] ) {
+          // console.log("Process cap area %o %o",cap_area_elements[k]['areaDesc'],cap_area_elements[k]['polygon']);
+          if ( cap_area_elements[k]['polygon'] ) {
 
-            var polygon_str = cap_area_elements[k]['cap:polygon'][0];
+            var polygon_str = cap_area_elements[k]['polygon'][0];
             var polygon_arr = []
 
-            // Parse cap:polygon into array of points consisting of lng lat comma separated
+            // Parse polygon into array of points consisting of lng lat comma separated
             var points_arr = polygon_str.split(' ');
             for ( var l = 0; l<points_arr.length; l++ ) {
               var lonlat = points_arr[l].split(',');
@@ -144,7 +148,7 @@ exports.handler = function(event, context) {
   
         });
   
-        // console.log("Send query %s",postData);
+        console.log("curl -X GET 'http://se.semweb.co/es/alertssubscriptions/_search' -d '",postData,"'");
   
         var options = {
           hostname: 'ce.semweb.co',
