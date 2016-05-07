@@ -106,7 +106,8 @@ exports.handler = function(event, context) {
             var points_arr = polygon_str.split(' ');
             for ( var l = 0; l<points_arr.length; l++ ) {
               var lonlat = points_arr[l].split(',');
-              polygon_arr.push([lonlat[0],lonlat[1]]);
+              // Flip the lon/lat due to geohash oddness
+              polygon_arr.push([lonlat[1],lonlat[0]]);
             }
 
             shape = {
