@@ -25,12 +25,18 @@ exports.handler = function(event, context) {
 
     // console.log("Event %o",event);
     console.log("Get xml2js 2");
-    var parseString = null;
+    var xml2js = require('xml2js');
+
+    var parseString = xml2js.parseString;
     var stripPrefix = null;
+
     try {
-      var xml2js = require('xml2js');
-      parseString = xml2js.parseString;
-      stripPrefix = xml2js.stripPrefix;
+      var prefixMatch = new RegExp(/(?!xmlns)^.*:/);
+
+      stripPrefix = function(str) {
+        return str.replace(prefixMatch, '');
+      };
+
     }
     catch ( err ) {
       console.log("Problem loading xml2js parse string %o",err);
@@ -53,7 +59,7 @@ exports.handler = function(event, context) {
         console.log("Parsed json payload");
 
         // try {
-          parseString(json_payload.alert.capXml, {tagNameProcessors:stripPrefix}, function(err, result) {
+          parseString(json_payload.alert.capXml, {tagNameProcessors:[stripPrefix]}, function(err, result) {
 
             if ( err ) {
               console.log("Parsed XML payload err:%o",err);
@@ -102,6 +108,7 @@ exports.handler = function(event, context) {
             var polygon_str = cap_area_elements[k]['polygon'][0];
             var polygon_arr = []
 
+            // String should be a sequence of space separated pairs, themselves split by a ,
             console.log("Process polygon_str",polygon_str);
 
             // Parse polygon into array of points consisting of lng lat comma separated
