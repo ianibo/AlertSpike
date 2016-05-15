@@ -90,13 +90,15 @@ def processEntry(sub) {
 
   try {
     def future = esclient.index {
-      index "alertsubscriptions"
+      index "alertssubscriptions"
       type "alertsubscription"
       id sub.subscriptionId
       source es_record
     }
 
-    future.get()
+    def r=future.actionGet()
+
+    println("Index completed ${r}");
   }
   catch ( Exception e ) {
     e.printStackTrace()
