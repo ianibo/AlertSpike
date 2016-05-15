@@ -76,10 +76,14 @@ def processEntry(sub) {
                     areaFilterId: sub.areaFilterId
                   ]
 
-  if ( sub.areaFilter.circleCenterRadius=="none") {
+  println("Value of sub.areaFilter.circleCenterRadius :: \"${sub.areaFilter.circleCenterRadius}\" ");
+  if ( ( sub.areaFilter.circleCenterRadius=="none") || 
+       ( sub.areaFilter.circleCenterRadius=="") || 
+       ( sub.areaFilter.circleCenterRadius==null) ) {
     // treat as polygon
+    println("Polygon");
     es_record.subshape.type='polygon'
-    es_record.subshape.coordinates=sub.areaFilter.polygonCoordinates
+    es_record.subshape.coordinates=[sub.areaFilter.polygonCoordinates]
   }
   else {
     es_record.subshape.type='circle'
