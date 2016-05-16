@@ -158,7 +158,7 @@ exports.handler = function(event, context) {
   
         });
   
-        console.log("curl -X GET 'http://se.semweb.co/es/alertssubscriptions/_search' -d '",postData,"'");
+        console.log("curl -X GET 'http://ce.semweb.co/es/alertssubscriptions/_search' -d '",postData,"'");
   
         var options = {
           hostname: 'ce.semweb.co',
