@@ -1,0 +1,10 @@
+http://schlitt.info/opensource/blog/0606_sending_head_requests_with_extcurl.html
+
+https://alerts.weather.gov/cap/us.php?x=0
+https://www.google.org/crisisresponse/s/pdfs/cap-and-google-crisis-response-partner-landi.pdf
+http://alert-hub.appspot.com/
+http://alert-hub.appspot.com/publishers
+
+curl -i -X HEAD "https://alerts.weather.gov/cap/us.php?x=0"
+
+
