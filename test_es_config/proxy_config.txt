@@ -1,0 +1,12 @@
+  <LocationMatch "/es">
+    ProxyPass http://localhost:9200/
+    ProxyPassReverse http://localhost:9200/
+    ProxyRequests off
+    Header add "Access-Control-Allow-Origin" "*"
+    Header add "Access-Control-Allow-Headers" "Authorization,Origin,X-Requested-With,Content-Type,Accept"
+    <Limit PUT DELETE>
+      order deny,allow 
+      deny from all 
+    </Limit>
+  </LocationMatch>
+
