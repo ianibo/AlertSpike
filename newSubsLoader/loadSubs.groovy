@@ -1,6 +1,6 @@
 @Grapes([
     @GrabResolver(name='mvnRepository', root='http://central.maven.org/maven2/'),
-    @Grab(group='org.elasticsearch', module='elasticsearch-groovy', version='2.0.0'),
+    @Grab(group='org.elasticsearch', module='elasticsearch-groovy', version='2.1.2'),
     @GrabExclude('org.codehaus.groovy:groovy-all')   
 ])
 
