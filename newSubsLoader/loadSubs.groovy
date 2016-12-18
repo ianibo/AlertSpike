@@ -1,6 +1,10 @@
 @Grapes([
     @GrabResolver(name='mvnRepository', root='http://central.maven.org/maven2/'),
     @Grab(group='org.elasticsearch', module='elasticsearch-groovy', version='2.1.2'),
+    @Grab(group = 'org.elasticsearch', module = 'elasticsearch', version = '5.1.1'),
+    @Grab(group = 'org.elasticsearch.client', module = 'transport', version = '5.1.1'),
+    @Grab(group = 'org.apache.logging.log4j', module = 'log4j-api', version = '2.7'),
+    @Grab(group = 'org.apache.logging.log4j', module = 'log4j-core', version = '2.7'),
     @GrabExclude('org.codehaus.groovy:groovy-all')   
 ])
 
@@ -11,22 +15,24 @@ import java.net.InetAddress;
 
 import org.elasticsearch.client.Client
 import org.elasticsearch.node.Node
-import static org.elasticsearch.node.NodeBuilder.nodeBuilder
 import org.elasticsearch.client.transport.TransportClient
 import org.elasticsearch.common.settings.Settings
 import org.elasticsearch.groovy.*
 import org.elasticsearch.common.transport.InetSocketTransportAddress
-import static org.elasticsearch.node.NodeBuilder.nodeBuilder
 
 println("Get ES");
 
-Settings settings = Settings.settingsBuilder()
-                       .put("client.transport.sniff", true)
-                       .put("cluster.name", "elasticsearch")
-                       .build();
-esclient = TransportClient.builder().settings(settings).build();
+// Settings settings = Settings.settingsBuilder()
+//                        .put("client.transport.sniff", true)
+//                        .put("cluster.name", "elasticsearch")
+//                        .build();
+// esclient = TransportClient.builder().settings(settings).build();
+
+esclient = new org.elasticsearch.transport.client.PreBuiltTransportClient(Settings.EMPTY)
+esclient.addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("localhost"), 9300))
+
 // add transport addresses
-esclient.addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("localhost"), 9300 as int))
+// esclient.addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("localhost"), 9300 as int))
 
 ctr = 0
 
