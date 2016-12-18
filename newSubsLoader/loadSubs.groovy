@@ -1,6 +1,6 @@
 @Grapes([
     @GrabResolver(name='mvnRepository', root='http://central.maven.org/maven2/'),
-    @Grab(group='org.elasticsearch', module='elasticsearch-groovy', version='2.1.2'),
+//    @Grab(group='org.elasticsearch', module='elasticsearch-groovy', version='2.1.2'),
     @Grab(group = 'org.elasticsearch', module = 'elasticsearch', version = '5.1.1'),
     @Grab(group = 'org.elasticsearch.client', module = 'transport', version = '5.1.1'),
     @Grab(group = 'org.apache.logging.log4j', module = 'log4j-api', version = '2.7'),
@@ -17,33 +17,28 @@ import org.elasticsearch.client.Client
 import org.elasticsearch.node.Node
 import org.elasticsearch.client.transport.TransportClient
 import org.elasticsearch.common.settings.Settings
-import org.elasticsearch.groovy.*
 import org.elasticsearch.common.transport.InetSocketTransportAddress
 
-println("Get ES");
 
-// Settings settings = Settings.settingsBuilder()
-//                        .put("client.transport.sniff", true)
-//                        .put("cluster.name", "elasticsearch")
-//                        .build();
-// esclient = TransportClient.builder().settings(settings).build();
+Settings settings = Settings.builder().put("cluster.name", "elasticsearch").build();
 
-esclient = new org.elasticsearch.transport.client.PreBuiltTransportClient(Settings.EMPTY)
-esclient.addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("localhost"), 9300))
+TransportClient esclient = new org.elasticsearch.transport.client.PreBuiltTransportClient(settings);
 
-// add transport addresses
-// esclient.addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("localhost"), 9300 as int))
+esclient.addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("localhost"), 9300));
+
 
 ctr = 0
 
 println("Load data");
-load()
+load(esclient)
 println("Done")
 
+// on shutdown
+esclient.close();
 System.exit(0);
 
 
-def load() {
+def load(esclient) {
   def data = null;
   def data_file = new File('./alert-hub-subscriptions.json');
   if ( data_file.exists() ) {
@@ -58,13 +53,13 @@ def load() {
     if ( sub.subscription.areaFilter?.polygonCoordinates ) {
       if ( sub.subscription.areaFilter?.polygonCoordinates.size() > 0 ) {
         // println("Got coords ${sub.subscription.areaFilter?.polygonCoordinates}");
-        processEntry(sub.subscription)
+        processEntry(sub.subscription, esclient)
       }
     }
   }
 }
 
-def processEntry(sub) {
+def processEntry(sub, esclient) {
 
   println("Process ${sub}");
 
@@ -99,15 +94,8 @@ def processEntry(sub) {
   def submit_start = System.currentTimeMillis();
 
   try {
-    def future = esclient.index {
-      index "alertssubscriptions"
-      type "alertsubscription"
-      id sub.subscriptionId
-      source es_record
-    }
-
-    def r=future.actionGet()
-
+    def future = esclient.prepareIndex('alertssubscriptions','alertsubscription').setSource(es_record)
+    def r=future.get()
     println("Index completed ${r}");
   }
   catch ( Exception e ) {
