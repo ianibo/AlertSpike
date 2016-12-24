@@ -40,7 +40,15 @@ System.exit(0);
 
 def load(esclient) {
   def data = null;
-  def data_file = new File('./alert-hub-subscriptions.json');
+  def data_file = null; 
+  if ( args.length == 1 ) {
+    println("Load subs from ${args[0]}");
+    data_file = new File(args[0])
+  }
+  else {
+    data_file = new File('./alert-hub-subscriptions.json');
+  }
+
   if ( data_file.exists() ) {
     data = new JsonSlurper().parseText( data_file.text )
   }
@@ -49,7 +57,6 @@ def load(esclient) {
   }
 
   data.subscriptions.each { sub ->
-    // println("Sub ${sub}");
     if ( sub.subscription.areaFilter?.polygonCoordinates ) {
       if ( sub.subscription.areaFilter?.polygonCoordinates.size() > 0 ) {
         // println("Got coords ${sub.subscription.areaFilter?.polygonCoordinates}");
@@ -61,7 +68,7 @@ def load(esclient) {
 
 def processEntry(sub, esclient) {
 
-  println("Process ${sub}");
+  println("Process ${sub.subscriptionId} : ${sub.subscriptionName}");
 
   def es_record = [
                     recid:sub.subscriptionId,
@@ -74,7 +81,8 @@ def processEntry(sub, esclient) {
                     officialOnly: sub.officialOnly,
                     xPathFilterId: sub.xPathFilterId,
                     xPathFilter: sub.xPathFilter,
-                    areaFilterId: sub.areaFilterId
+                    areaFilterId: sub.areaFilterId,
+                    loadSubsVersion: "1.1"
                   ]
 
   println("Value of sub.areaFilter.circleCenterRadius :: \"${sub.areaFilter.circleCenterRadius}\" ");
@@ -87,6 +95,7 @@ def processEntry(sub, esclient) {
     es_record.subshape.coordinates=[sub.areaFilter.polygonCoordinates]
   }
   else {
+    println("Circle");
     es_record.subshape.type='circle'
     es_record.subshape.coordinates=sub.areaFilter.polygonCoordinates
   }
@@ -94,9 +103,11 @@ def processEntry(sub, esclient) {
   def submit_start = System.currentTimeMillis();
 
   try {
+    println("Prepare");
     def future = esclient.prepareIndex('alertssubscriptions','alertsubscription').setSource(es_record)
+    println("Get");
     def r=future.get()
-    println("Index completed ${r}");
+    println("Completed ${r}");
   }
   catch ( Exception e ) {
     e.printStackTrace()

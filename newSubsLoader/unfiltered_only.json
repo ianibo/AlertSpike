@@ -1,0 +1,20 @@
+{
+  "subscriptions" : [{
+    "subscription" : {
+      "subscriptionId" : "unfiltered",
+      "subscriptionName" : "Valid CAP alerts received, unfiltered",
+      "subscriptionUrl" : "https://alert-feeds.s3.amazonaws.com/unfiltered/rss.xml",
+      "languageOnly" : "none",
+      "highPriorityOnly" : false,
+      "officialOnly" : false,
+      "xPathFilterId" : "unfiltered",
+      "xPathFilter" : "none",
+      "areaFilterId" : "unfiltered",
+      "areaFilter" : {
+        "polygonCoordinates" : [[-180,-90],[180,-90],[180,90],[-180,90],[-180,-90]],
+        "circleCenterRadius" : "none"
+      },
+      "feed-rss-xml" : "<?xml version='1.0' encoding='UTF-8'?><rss version='2.0' xmlns:atom='http://www.w3.org/2005/Atom'><channel><link rel='alternate' title='RSS' href='https://s3-eu-west-1.amazonaws.com/alert-feeds/unfiltered/rss.xml' type='application/rss+xml' /><title>Latest Valid CAP alerts received, unfiltered</title><link>https://s3-eu-west-1.amazonaws.com/alert-feeds/unfiltered/rss.xml</link><description>This feed lists the most recent valid CAP alerts uploaded to the Filtered Alert Hub.</description><language>en</language><copyright>public domain</copyright><pubDate>Thu, 19 Dec 2013 10:31:34 GMT</pubDate><lastBuildDate>Thu, 19 Dec 2013 10:31:34 GMT</lastBuildDate><docs>http://blogs.law.harvard.edu/tech/rss</docs><image><title>Latest Valid CAP alerts received, unfiltered</title><url>https://s3-eu-west-1.amazonaws.com/alert-feeds/unfiltered/logo.jpg</url><link>https://s3-eu-west-1.amazonaws.com/alert-feeds/unfiltered/rss.xml</link></image></channel></rss>"
+    }
+  } ]
+}
